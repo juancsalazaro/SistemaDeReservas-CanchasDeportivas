@@ -1,0 +1,120 @@
+<div class="register-page">
+  <div class="register-container">
+    <div class="register-form-section">
+      <div class="register-card">
+        <div class="register-header">
+          <div class="sport-icon">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <h2 class="register-title">Crear Cuenta</h2>
+          <p class="register-subtitle">Únete a nuestro sistema de reservas</p>
+        </div>
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-user me-2"></i>Usuario
+            </label>
+            <input 
+              formControlName="username" 
+              class="form-control" 
+              [class.is-invalid]="isFieldInvalid('username')"
+              placeholder="Elige tu nombre de usuario"
+              autocomplete="username"
+            />
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('username')">
+              {{ getErrorMessage('username') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-lock me-2"></i>Contraseña
+            </label>
+            <div class="password-input-container">
+              <input 
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password" 
+                class="form-control" 
+                [class.is-invalid]="isFieldInvalid('password')"
+                placeholder="Crea una contraseña segura"
+                autocomplete="new-password"
+              />
+              <button 
+                type="button" 
+                class="password-toggle-btn"
+                (click)="togglePasswordVisibility()"
+              >
+                <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('password')">
+              {{ getErrorMessage('password') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-check-circle me-2"></i>Confirmar Contraseña
+            </label>
+            <div class="password-input-container">
+              <input 
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                formControlName="confirmPassword" 
+                class="form-control" 
+                [class.is-invalid]="isFieldInvalid('confirmPassword')"
+                placeholder="Confirma tu contraseña"
+                autocomplete="new-password"
+              />
+              <button 
+                type="button" 
+                class="password-toggle-btn"
+                (click)="toggleConfirmPasswordVisibility()"
+              >
+                <i [class]="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('confirmPassword')">
+              {{ getErrorMessage('confirmPassword') }}
+            </div>
+          </div>
+
+          <div class="alert alert-danger" *ngIf="errorMessage" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ errorMessage }}
+          </div>
+
+          <div class="alert alert-success" *ngIf="successMessage" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            {{ successMessage }}
+          </div>
+
+          <button 
+            type="submit" 
+            class="btn btn-success w-100"
+            [disabled]="registerForm.invalid || isLoading"
+          >
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <i *ngIf="!isLoading" class="fas fa-user-plus me-2"></i>
+            {{ isLoading ? 'Creando cuenta...' : 'Crear Cuenta' }}
+          </button>
+
+          <div class="login-link">
+            <p>
+              ¿Ya tienes cuenta? 
+              <a routerLink="/login" class="link-primary">
+                <strong>Inicia sesión aquí</strong>
+              </a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="register-image-section">
+      <div class="image-content">
+        <img src="../../../assets/register.png" alt="Sistema de Reservas Deportivas" class="login-image">
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,83 @@
+# Dependencies
+node_modules/
+BackEnd/bin/
+BackEnd/obj/
+FrontEnd/node_modules/
+
+# Build outputs
+BackEnd/bin/
+BackEnd/obj/
+FrontEnd/dist/
+FrontEnd/.angular/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+BackEnd/appsettings.Development.json
+BackEnd/appsettings.Production.json
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+**/.vs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Backend specific (.NET)
+BackEnd/**/*.user
+BackEnd/**/*.suo
+BackEnd/**/*.userprefs
+BackEnd/.vs/
+BackEnd/**/bin/
+BackEnd/**/obj/
+BackEnd/**/*.dll
+BackEnd/**/*.pdb
+
+# Frontend specific (Angular)
+FrontEnd/.angular/
+FrontEnd/npm-debug.log
+FrontEnd/yarn-error.log
+FrontEnd/coverage/
+FrontEnd/.nyc_output/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+BackEnd/*.db
+BackEnd/*.sqlite
+
+# Temporary files
+*.tmp
+*.temp
+
+# Package files
+*.tgz
+*.tar.gz
+
+# Migration backups (if any)
+BackEnd/Migrations/*.backup

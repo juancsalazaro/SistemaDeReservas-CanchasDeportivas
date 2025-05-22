@@ -1,0 +1,89 @@
+<div class="login-page">
+  <div class="login-container">
+    <div class="login-image-section">
+      <div class="image-content">
+        <img src="../../../assets/login.png" alt="Sistema de Reservas Deportivas" class="login-image">
+      </div>
+    </div>
+
+    <div class="login-form-section">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="sport-icon">
+            <i class="fas fa-futbol"></i>
+          </div>
+          <h2 class="login-title">Bienvenido</h2>
+          <p class="login-subtitle">Inicia sesión en tu cuenta</p>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-user me-2"></i>Usuario
+            </label>
+            <input 
+              formControlName="username" 
+              class="form-control" 
+              [class.is-invalid]="isFieldInvalid('username')"
+              placeholder="Ingresa tu usuario"
+              autocomplete="username"
+            />
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('username')">
+              {{ getErrorMessage('username') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-lock me-2"></i>Contraseña
+            </label>
+            <div class="password-input-container">
+              <input 
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password" 
+                class="form-control" 
+                [class.is-invalid]="isFieldInvalid('password')"
+                placeholder="Ingresa tu contraseña"
+                autocomplete="current-password"
+              />
+              <button 
+                type="button" 
+                class="password-toggle-btn"
+                (click)="togglePasswordVisibility()"
+              >
+                <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('password')">
+              {{ getErrorMessage('password') }}
+            </div>
+          </div>
+
+          <div class="alert alert-danger" *ngIf="errorMessage" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ errorMessage }}
+          </div>
+
+          <button 
+            type="submit" 
+            class="btn btn-primary w-100"
+            [disabled]="loginForm.invalid || isLoading"
+          >
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <i *ngIf="!isLoading" class="fas fa-sign-in-alt me-2"></i>
+            {{ isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+          </button>
+
+          <div class="register-link">
+            <p>
+              ¿No tienes cuenta? 
+              <a routerLink="/register" class="link-primary">
+                <strong>Regístrate aquí</strong>
+              </a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
