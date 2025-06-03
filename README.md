@@ -4,7 +4,7 @@ Un sistema web moderno para la gestión y reserva de canchas deportivas, desarro
 
 ## 📋 Descripción
 
-Este proyecto permite a los usuarios registrarse, iniciar sesión y gestionar reservas de canchas deportivas de manera intuitiva. El sistema cuenta con una arquitectura robusta dividida en backend y frontend, ofreciendo una experiencia de usuario fluida y moderna.
+Este proyecto permite a los usuarios registrarse, iniciar sesión y gestionar reservas de canchas deportivas de manera intuitiva. El sistema cuenta con una arquitectura robusta dividida en backend y frontend, ofreciendo una experiencia de usuario fluida y moderna con un dashboard.
 
 ## 🚀 Tecnologías Utilizadas
 
@@ -24,18 +24,20 @@ Este proyecto permite a los usuarios registrarse, iniciar sesión y gestionar re
 - **Reactive Forms** - Manejo de formularios
 
 ## 📁 Estructura del Proyecto
-
-```
 SistemaDeReservas-CanchasDeportivas/
 ├── BackEnd/
 │   ├── Controllers/
-│   │   └── AuthController.cs
+│   │   ├── AuthController.cs
+│   │   └── CanchasController.cs
 │   ├── Data/
 │   │   └── AppDbContext.cs
 │   ├── Models/
-│   │   └── User.cs
+│   │   ├── User.cs
+│   │   └── Cancha.cs
 │   ├── Dtos/
-│   │   └── UserDto.cs
+│   │   ├── UserDto.cs
+│   │   ├── CanchaDto.cs
+│   │   └── CanchaResponseDto.cs
 │   ├── Migrations/
 │   └── Program.cs
 ├── FrontEnd/
@@ -47,13 +49,15 @@ SistemaDeReservas-CanchasDeportivas/
 │   │   │   │   └── auth.service.ts
 │   │   │   ├── features/
 │   │   │   │   ├── login/
-│   │   │   │   └── register/
+│   │   │   │   ├── register/
+│   │   │   │   └── dashboard/
 │   │   │   ├── models/
-│   │   │   │   └── user.dto.ts
+│   │   │   │   ├── user.dto.ts
+│   │   │   │   └── cancha.dto.ts
 │   │   │   └── services/
+│   │   │       └── canchas.service.ts
 │   │   └── assets/
 └── README.md
-```
 
 ## ⚙️ Instalación y Configuración
 
@@ -69,115 +73,134 @@ SistemaDeReservas-CanchasDeportivas/
    ```bash
    git clone https://github.com/juancsalazaro/SistemaDeReservas-CanchasDeportivas-.git
    cd SistemaDeReservas-CanchasDeportivas-
-   ```
 
-2. **Configurar PostgreSQL**
-   ```sql
-   -- Crear base de datos
-   CREATE DATABASE reservas_canchas;
-   
-   -- Crear usuario (opcional)
-   CREATE USER reservas_user WITH PASSWORD 'tu_password';
-   GRANT ALL PRIVILEGES ON DATABASE reservas_canchas TO reservas_user;
-   ```
+Configurar PostgreSQL
+sql-- Crear base de datos
+CREATE DATABASE ReservasCanchas;
 
-3. **Configurar cadena de conexión**
-   
-   Actualizar `BackEnd/appsettings.json`:
-   ```json
-   {
-     \"ConnectionStrings\": {
-       \"DefaultConnection\": \"Host=localhost;Database=reservas_canchas;Username=postgres;Password=tu_password;Port=5432\"
-     },
-     \"Jwt\": {
-       \"Key\": \"TuClaveSecretaMuySeguraAqui123456789\"
-     }
-   }
-   ```
+-- Crear usuario (opcional)
+CREATE USER reservas_user WITH PASSWORD 'tu_password';
+GRANT ALL PRIVILEGES ON DATABASE ReservasCanchas TO reservas_user;
 
-4. **Instalar dependencias y ejecutar migraciones**
-   ```bash
-   cd BackEnd
-   dotnet restore
-   dotnet ef database update
-   ```
-
-5. **Ejecutar el backend**
-   ```bash
-   dotnet run
-   ```
-   
-   El API estará disponible en: `http://localhost:5286`
-
-### 🎨 Configuración del Frontend
-
-1. **Instalar dependencias**
-   ```bash
-   cd FrontEnd
-   npm install
-   ```
-
-2. **Ejecutar el frontend**
-   ```bash
-   ng serve
-   ```
-   
-   La aplicación estará disponible en: `http://localhost:4200`
-
-## 🔧 Endpoints de la API
-
-### Autenticación
-
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| POST | `/api/v1/auth/register` | Registrar nuevo usuario |
-| POST | `/api/v1/auth/login` | Iniciar sesión |
-
-### Ejemplo de uso
-
-**Registro:**
-```json
-POST /api/v1/auth/register
-{
-  \"username\": \"usuario123\",
-  \"password\": \"contraseña123\"
+Configurar cadena de conexión
+Actualizar BackEnd/appsettings.json:
+json{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Database=ReservasCanchas;Username=postgres;Password=tu_password;Port=5432"
+  },
+  "Jwt": {
+    "Key": "TuClaveSecretaMuySeguraAqui123456789"
+  }
 }
-```
 
-**Login:**
-```json
-POST /api/v1/auth/login
+Instalar dependencias y ejecutar migraciones
+bashcd BackEnd
+dotnet restore
+dotnet ef database update
+
+Ejecutar el backend
+bashdotnet run
+El API estará disponible en: http://localhost:5286
+
+🎨 Configuración del Frontend
+
+Instalar dependencias
+bashcd FrontEnd
+npm install
+
+Ejecutar el frontend
+bashng serve
+La aplicación estará disponible en: http://localhost:4200
+
+🔧 Endpoints de la API
+Autenticación
+MétodoEndpointDescripciónPOST/api/v1/auth/registerRegistrar nuevo usuarioPOST/api/v1/auth/loginIniciar sesión
+Canchas
+MétodoEndpointDescripciónGET/api/v1/canchasObtener todas las canchas con filtrosGET/api/v1/canchas/{id}Obtener cancha por IDPOST/api/v1/canchasCrear nueva cancha (requiere autenticación)GET/api/v1/canchas/tipos-deporteObtener tipos de deportes disponibles
+Ejemplo de uso
+Registro:
+jsonPOST /api/v1/auth/register
 {
-  \"username\": \"usuario123\",
-  \"password\": \"contraseña123\"
+  "username": "usuario123",
+  "password": "contraseña123"
 }
-```
+Login:
+jsonPOST /api/v1/auth/login
+{
+  "username": "usuario123",
+  "password": "contraseña123"
+}
+Obtener canchas con filtros:
+bashGET /api/v1/canchas?tipoDeporte=Futbol&precioMaximo=50000&disponible=true
+Crear cancha:
+jsonPOST /api/v1/canchas
+Authorization: Bearer {token}
+{
+  "nombre": "Cancha El Estadio",
+  "descripcion": "Cancha de fútbol profesional con césped sintético",
+  "tipoDeporte": "Futbol",
+  "ubicacion": "Estadio La Nubia, Manizales",
+  "precioPorHora": 80000,
+  "amenidades": "[\"Vestuarios\", \"Estacionamiento\", \"Iluminación\"]"
+}
+🎯 Funcionalidades Implementadas
+✅ Autenticación y Seguridad
 
-## 🎯 Funcionalidades Implementadas
+Registro de usuarios con validaciones robustas
+Inicio de sesión con JWT
+Encriptación de contraseñas con BCrypt
+Guards y interceptores para protección de rutas
 
-- ✅ **Registro de usuarios** con validaciones
-- ✅ **Inicio de sesión** con JWT
-- ✅ **Validación de formularios** en tiempo real
-- ✅ **Diseño responsive** para todos los dispositivos
-- ✅ **Encriptación de contraseñas** con BCrypt
-- ✅ **Manejo de errores** y feedback al usuario
-- ✅ **Interfaz moderna** con efectos y animaciones
+✅ Gestión de Canchas
 
-## 🔮 Funcionalidades Futuras
+CRUD completo de canchas deportivas
+Filtros avanzados por deporte, precio y disponibilidad
+Búsqueda por ubicación integrada
+Categorización por tipos de deporte
+Sistema de calificaciones y reseñas
 
-- 🔄 Gestión de canchas deportivas
-- 📅 Sistema de reservas por fecha/hora
-- 👥 Panel de administración
-- 📊 Reportes y estadísticas
-- 💳 Integración de pagos
-- 📱 Aplicación móvil
-- 🔔 Sistema de notificaciones
+✅ Dashboard
 
-## 🛠️ Comandos Útiles
+Interfaz moderna
+Buscador avanzado con múltiples filtros
+Grid responsive de canchas
+Cards interactivas con hover effects
+Categorías deportivas con iconos
+Loading states elegantes
 
-### Backend
-```bash
-# Restaurar paquetes
+✅ Experiencia de Usuario
+
+Diseño responsive para todos los dispositivos
+Validación de formularios en tiempo real
+Manejo de errores con feedback visual
+Animaciones suaves y transiciones
+Estados de carga informativos
+Navegación intuitiva entre secciones
+
+✅ Tecnología y Arquitectura
+
+API REST bien estructurada
+Base de datos PostgreSQL optimizada
+Componentes standalone en Angular
+Servicios modulares y reutilizables
+Arquitectura escalable y mantenible
+
+🔮 Funcionalidades Futuras
+
+📅 Sistema de reservas por fecha/hora
+💳 Pasarela de pagos integrada
+👥 Panel de administración avanzado
+📊 Dashboard de estadísticas y reportes
+🔔 Sistema de notificaciones en tiempo real
+📱 Aplicación móvil nativa
+🗓️ Calendario de disponibilidad interactivo
+⭐ Sistema de reseñas y comentarios
+🏆 Programa de fidelización para usuarios
+📍 Integración con mapas para ubicaciones
+
+🛠️ Comandos Útiles
+Backend
+bash# Restaurar paquetes
 dotnet restore
 
 # Crear nueva migración
@@ -191,42 +214,77 @@ dotnet run
 
 # Compilar para producción
 dotnet publish -c Release
-```
 
-### Frontend
-```bash
-# Instalar dependencias
+# Ver ayuda de EF Core
+dotnet ef --help
+Frontend
+bash# Instalar dependencias
 npm install
 
 # Ejecutar en desarrollo
 ng serve
 
 # Compilar para producción
-ng build --prod
+ng build --configuration production
 
 # Ejecutar tests
 ng test
 
 # Generar componente
-ng generate component nombre-componente
-```
+ng generate component features/nombre-componente
 
-## 🤝 Contribuciones
+# Generar servicio
+ng generate service services/nombre-servicio
 
+# Linting del código
+ng lint
+🎨 Capturas de Pantalla
+Dashboard Principal
+Interfaz principal con búsqueda avanzada y grid de canchas
+Login/Register
+Formularios modernos con validaciones en tiempo real y diseño responsive
+Gestión de Canchas
+CRUD completo con filtros y categorización por deportes
+🔍 Características Técnicas
+Backend (.NET 8)
+
+Entity Framework Core con PostgreSQL
+JWT Authentication stateless
+CORS configurado para desarrollo
+Swagger/OpenAPI para documentación
+Validaciones robustas en DTOs
+Arquitectura limpia con separación de responsabilidades
+
+Frontend (Angular 18)
+
+Standalone Components modernos
+Reactive Forms con validaciones
+RxJS para manejo de estado
+Font Awesome para iconografía
+CSS moderno con variables y gradientes
+TypeScript estricto para type safety
+
+🤝 Contribuciones
 Las contribuciones son bienvenidas. Para contribuir:
 
-1. Fork el proyecto
-2. Crea una rama feature (`git checkout -b feature/NuevaFuncionalidad`)
-3. Commit tus cambios (`git commit -m 'Agregar nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/NuevaFuncionalidad`)
-5. Abre un Pull Request
+Fork el proyecto
+Crea una rama feature (git checkout -b feature/NuevaFuncionalidad)
+Commit tus cambios (git commit -m 'Agregar nueva funcionalidad')
+Push a la rama (git push origin feature/NuevaFuncionalidad)
+Abre un Pull Request
 
-## 👨‍💻 Autor
+Guías de Contribución
 
-**Juan Carlos Salazar**
-- GitHub: [@juancsalazaro](https://github.com/juancsalazaro)
-- LinkedIn: [juan-camilo-salazar-osorio]([https://linkedin.com/in/tu-perfil](https://www.linkedin.com/in/juan-camilo-salazar-osorio/))
+Seguir las convenciones de naming establecidas
+Incluir tests para nuevas funcionalidades
+Actualizar documentación cuando sea necesario
+Mantener el estilo de código consistente
 
----
+👨‍💻 Autor
+Juan Carlos Salazar
 
-⭐ Si te gusta este proyecto, ¡dale una estrella!
+GitHub: @juancsalazaro
+LinkedIn: juan-camilo-salazar-osorio
+
+⭐ Si te gusta este proyecto, ¡dale una estrella en GitHub!
+🚀 Estado del Proyecto: Activamente desarrollado | Versión: 1.0.0 | Última actualización: Junio 2025
