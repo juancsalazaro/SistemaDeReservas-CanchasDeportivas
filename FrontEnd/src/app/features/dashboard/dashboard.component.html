@@ -1,1 +1,224 @@
-<p>dashboard works!</p>
+<div class="dashboard-page">
+  <!-- Header Navigation -->
+  <header class="dashboard-header">
+    <div class="container">
+      <nav class="navbar">
+        <div class="nav-brand">
+          <i class="fas fa-futbol brand-icon"></i>
+          <span class="brand-text">ReservaCanchas</span>
+        </div>
+
+        <div class="nav-menu">
+          <button class="nav-item active">
+            <i class="fas fa-home"></i>
+            Inicio
+          </button>
+          <button class="nav-item">
+            <i class="fas fa-calendar-alt"></i>
+            Mis Reservas
+          </button>
+          <div class="user-menu">
+            <button class="user-avatar" (click)="logout()">
+              <i class="fas fa-user"></i>
+              <span>Salir</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Search Bar Section -->
+  <section class="search-section">
+    <div class="container">
+      <div class="search-card">
+        <h1 class="search-title">Encuentra la cancha perfecta</h1>
+        <p class="search-subtitle">Descubre y reserva las mejores canchas deportivas cerca de ti</p>
+        <div class="search-form">
+          <div class="search-group">
+            <label class="search-label">
+              <i class="fas fa-map-marker-alt"></i>
+              Ubicación
+            </label>
+            <input
+              type="text"
+              [(ngModel)]="searchLocation"
+              placeholder="¿Dónde quieres jugar?"
+              class="search-input"
+            />
+          </div>
+
+          <div class="search-group">
+            <label class="search-label">
+              <i class="fas fa-running"></i>
+              Deporte
+            </label>
+            <select [(ngModel)]="selectedSport" class="search-select">
+              <option value="">Cualquier deporte</option>
+              <option *ngFor="let tipo of tiposDeporte" [value]="tipo">{{ tipo }}</option>
+            </select>
+          </div>
+
+          <div class="search-group">
+            <label class="search-label">
+              <i class="fas fa-dollar-sign"></i>
+              Precio máximo
+            </label>
+            <input
+              type="number"
+              [(ngModel)]="maxPrice"
+              placeholder="Por hora"
+              class="search-input"
+            />
+          </div>
+
+          <button class="search-btn" (click)="onSearch()" [disabled]="isLoading">
+            <i class="fas fa-search"></i>
+            <span *ngIf="!isLoading">Buscar</span>
+            <span *ngIf="isLoading">Buscando...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sports Categories -->
+  <section class="categories-section">
+    <div class="container">
+      <div class="categories-scroll">
+        <button
+          class="category-item"
+          [class.active]="selectedSport === ''"
+          (click)="clearFilters()"
+        >
+          <i class="fas fa-th-large"></i>
+          <span>Todos</span>
+        </button>
+        <button
+          *ngFor="let tipo of tiposDeporte"
+          class="category-item"
+          [class.active]="selectedSport === tipo"
+          (click)="onFilterBySport(tipo)"
+        >
+          <i [class]="getSportIcon(tipo)"></i>
+          <span>{{ tipo }}</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results Section -->
+  <section class="results-section">
+    <div class="container">
+      <!-- Results Header -->
+      <div class="results-header">
+        <h2 class="results-title">
+          <span *ngIf="!searchLocation && !selectedSport">Canchas disponibles</span>
+          <span *ngIf="searchLocation || selectedSport">
+            Resultados de búsqueda
+            <span *ngIf="selectedSport"> • {{ selectedSport }}</span>
+            <span *ngIf="searchLocation"> • {{ searchLocation }}</span>
+          </span>
+        </h2>
+        <p class="results-count">{{ canchas.length }} canchas encontradas</p>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="loading-grid">
+          <div *ngFor="let item of [1,2,3,4,5,6]" class="loading-card">
+            <div class="loading-image"></div>
+            <div class="loading-content">
+              <div class="loading-line loading-title"></div>
+              <div class="loading-line loading-subtitle"></div>
+              <div class="loading-line loading-price"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canchas Grid -->
+      <div *ngIf="!isLoading" class="canchas-grid">
+        <div
+          *ngFor="let cancha of canchas"
+          class="cancha-card"
+          (click)="viewCancha(cancha.id)"
+        >
+          <!-- Image -->
+          <div class="cancha-image-container">
+            <img
+              [src]="getImageUrl(cancha.imagenPrincipal)"
+              [alt]="cancha.nombre"
+              class="cancha-image"
+              loading="lazy"
+            />
+            <div class="favorite-btn">
+              <i class="far fa-heart"></i>
+            </div>
+            <div class="sport-badge">{{ cancha.tipoDeporte }}</div>
+          </div>
+
+          <!-- Content -->
+          <div class="cancha-content">
+            <div class="cancha-header">
+              <h3 class="cancha-name">{{ cancha.nombre }}</h3>
+              <div class="cancha-rating" *ngIf="cancha.numeroCalificaciones > 0">
+                <i class="fas fa-star"></i>
+                <span class="rating-value">{{ cancha.calificacion.toFixed(1) }}</span>
+                <span class="rating-count">({{ cancha.numeroCalificaciones }})</span>
+              </div>
+            </div>
+
+            <p class="cancha-location">
+              <i class="fas fa-map-marker-alt"></i>
+              {{ cancha.ubicacion }}
+            </p>
+
+            <p class="cancha-description">{{ cancha.descripcion }}</p>
+
+            <!-- Amenidades -->
+            <div class="amenidades" *ngIf="parseAmenidades(cancha.amenidades).length > 0">
+              <span
+                *ngFor="let amenidad of parseAmenidades(cancha.amenidades).slice(0, 3)"
+                class="amenidad-tag"
+              >
+                {{ amenidad }}
+              </span>
+              <span
+                *ngIf="parseAmenidades(cancha.amenidades).length > 3"
+                class="amenidad-more"
+              >
+                +{{ parseAmenidades(cancha.amenidades).length - 3 }} más
+              </span>
+            </div>
+
+            <div class="cancha-footer">
+              <div class="cancha-price">
+                <span class="price-amount">{{ formatPrice(cancha.precioPorHora) }}</span>
+                <span class="price-period">/ hora</span>
+              </div>
+              <div class="availability" [class.available]="cancha.disponible">
+                <i [class]="cancha.disponible ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
+                <span>{{ cancha.disponible ? 'Disponible' : 'No disponible' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && canchas.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-search"></i>
+        </div>
+        <h3 class="empty-title">No se encontraron canchas</h3>
+        <p class="empty-description">
+          Intenta ajustar tus filtros de búsqueda o explora todas las canchas disponibles.
+        </p>
+        <button class="empty-action" (click)="clearFilters()">
+          Ver todas las canchas
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
