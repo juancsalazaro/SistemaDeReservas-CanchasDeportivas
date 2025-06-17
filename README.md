@@ -402,7 +402,7 @@ Las contribuciones son bienvenidas. Para contribuir:
 
 ## 👨‍💻 Autor
 
-**Juan Carlos Salazar**
+**Juan Camilo Salazar**
 - GitHub: [@juancsalazaro](https://github.com/juancsalazaro)
 - LinkedIn: [juan-camilo-salazar-osorio](https://www.linkedin.com/in/juan-camilo-salazar-osorio/)
 
