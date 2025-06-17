@@ -1,6 +1,6 @@
 ## 📋 Descripción
 
-Este proyecto permite a los usuarios registrarse, iniciar sesión y gestionar reservas de canchas deportivas de manera intuitiva. El sistema cuenta con una arquitectura robusta dividida en backend y frontend, ofreciendo una experiencia de usuario fluida y moderna.
+Este proyecto permite a los usuarios registrarse, iniciar sesión y gestionar reservas de canchas deportivas de manera intuitiva. El sistema cuenta con una arquitectura robusta dividida en backend y frontend, ofreciendo una experiencia de usuario fluida y moderna con **sistema de reservas completo**.
 
 ## 🚀 Tecnologías Utilizadas
 
@@ -26,16 +26,22 @@ SistemaDeReservas-CanchasDeportivas/
 ├── BackEnd/
 │   ├── Controllers/
 │   │   ├── AuthController.cs
-│   │   └── CanchasController.cs
+│   │   ├── CanchasController.cs
+│   │   └── ReservasController.cs          # ✅ NUEVO
 │   ├── Data/
 │   │   └── AppDbContext.cs
 │   ├── Models/
 │   │   ├── User.cs
-│   │   └── Cancha.cs
+│   │   ├── Cancha.cs
+│   │   └── Reserva.cs                     # ✅ NUEVO
 │   ├── Dtos/
 │   │   ├── UserDto.cs
 │   │   ├── CanchaDto.cs
-│   │   └── CanchaResponseDto.cs
+│   │   ├── CanchaResponseDto.cs
+│   │   ├── ReservaDto.cs                  # ✅ NUEVO
+│   │   ├── ReservaResponseDto.cs          # ✅ NUEVO
+│   │   ├── DisponibilidadResponseDto.cs   # ✅ NUEVO
+│   │   └── PagoSimuladoDto.cs            # ✅ NUEVO
 │   ├── Migrations/
 │   └── Program.cs
 ├── FrontEnd/
@@ -48,12 +54,15 @@ SistemaDeReservas-CanchasDeportivas/
 │   │   │   ├── features/
 │   │   │   │   ├── login/
 │   │   │   │   ├── register/
-│   │   │   │   └── dashboard/
+│   │   │   │   ├── dashboard/
+│   │   │   │   └── reservas/             # ✅ NUEVO
 │   │   │   ├── models/
 │   │   │   │   ├── user.dto.ts
-│   │   │   │   └── cancha.dto.ts
+│   │   │   │   ├── cancha.dto.ts
+│   │   │   │   └── reserva.dto.ts        # ✅ NUEVO
 │   │   │   └── services/
-│   │   │       └── canchas.service.ts
+│   │   │       ├── canchas.service.ts
+│   │   │       └── reservas.service.ts   # ✅ NUEVO
 │   │   └── assets/
 └── README.md
 ```
@@ -89,11 +98,11 @@ SistemaDeReservas-CanchasDeportivas/
    Actualizar `BackEnd/appsettings.json`:
    ```json
    {
-     \"ConnectionStrings\": {
-       \"DefaultConnection\": \"Host=localhost;Database=ReservasCanchas;Username=postgres;Password=tu_password;Port=5432\"
+     "ConnectionStrings": {
+       "DefaultConnection": "Host=localhost;Database=ReservasCanchas;Username=postgres;Password=tu_password;Port=5432"
      },
-     \"Jwt\": {
-       \"Key\": \"TuClaveSecretaMuySeguraAqui123456789\"
+     "Jwt": {
+       "Key": "TuClaveSecretaMuySeguraAqui123456789"
      }
    }
    ```
@@ -145,14 +154,24 @@ SistemaDeReservas-CanchasDeportivas/
 | POST | `/api/v1/canchas` | Crear nueva cancha (requiere autenticación) |
 | GET | `/api/v1/canchas/tipos-deporte` | Obtener tipos de deportes disponibles |
 
+### 🆕 Reservas
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/v1/reservas` | Crear nueva reserva |
+| GET | `/api/v1/reservas/mis-reservas` | Obtener reservas del usuario autenticado |
+| GET | `/api/v1/reservas/{id}` | Obtener reserva específica por ID |
+| GET | `/api/v1/reservas/disponibilidad` | Consultar disponibilidad de cancha por fecha |
+| PATCH | `/api/v1/reservas/{id}/cancelar` | Cancelar una reserva |
+
 ### Ejemplo de uso
 
 **Registro:**
 ```json
 POST /api/v1/auth/register
 {
-  \"username\": \"usuario123\",
-  \"password\": \"contraseña123\"
+  "username": "usuario123",
+  "password": "contraseña123"
 }
 ```
 
@@ -160,8 +179,8 @@ POST /api/v1/auth/register
 ```json
 POST /api/v1/auth/login
 {
-  \"username\": \"usuario123\",
-  \"password\": \"contraseña123\"
+  "username": "usuario123",
+  "password": "contraseña123"
 }
 ```
 
@@ -175,13 +194,41 @@ GET /api/v1/canchas?tipoDeporte=Futbol&precioMaximo=50000&disponible=true
 POST /api/v1/canchas
 Authorization: Bearer {token}
 {
-  \"nombre\": \"Cancha El Estadio\",
-  \"descripcion\": \"Cancha de fútbol profesional con césped sintético\",
-  \"tipoDeporte\": \"Futbol\",
-  \"ubicacion\": \"Estadio La Nubia, Manizales\",
-  \"precioPorHora\": 80000,
-  \"amenidades\": \"[\\\"Vestuarios\\\", \\\"Estacionamiento\\\", \\\"Iluminación\\\"]\"
+  "nombre": "Cancha El Estadio",
+  "descripcion": "Cancha de fútbol profesional con césped sintético",
+  "tipoDeporte": "Futbol",
+  "ubicacion": "Estadio La Nubia, Manizales",
+  "precioPorHora": 80000,
+  "amenidades": "[\"Vestuarios\", \"Estacionamiento\", \"Iluminación\"]"
 }
+```
+
+**🆕 Crear reserva:**
+```json
+POST /api/v1/reservas
+Authorization: Bearer {token}
+{
+  "canchaId": 1,
+  "fechaReserva": "2024-07-15T00:00:00",
+  "horaInicio": "2024-07-15T14:00:00",
+  "horaFin": "2024-07-15T16:00:00",
+  "nombreCliente": "Juan Pérez",
+  "emailCliente": "juan@email.com",
+  "telefonoCliente": "123456789",
+  "observaciones": "Reserva para partido amistoso",
+  "datosPago": {
+    "tipoTarjeta": "Visa",
+    "numeroTarjeta": "4111 1111 1111 1111",
+    "nombreTarjeta": "Juan Pérez",
+    "fechaVencimiento": "12/25",
+    "cvv": "123"
+  }
+}
+```
+
+**🆕 Consultar disponibilidad:**
+```bash
+GET /api/v1/reservas/disponibilidad?canchaId=1&fecha=2024-07-15T00:00:00
 ```
 
 ## 🎯 Funcionalidades Implementadas
@@ -198,6 +245,17 @@ Authorization: Bearer {token}
 - **Búsqueda por ubicación** integrada
 - **Categorización** por tipos de deporte
 - **Sistema de calificaciones** y reseñas
+
+### 🆕 ✅ Sistema de Reservas
+- **Creación de reservas** con validación de disponibilidad
+- **Gestión de horarios** por bloques de tiempo
+- **Verificación de conflictos** de reservas
+- **Consulta de disponibilidad** en tiempo real
+- **Cancelación de reservas** con restricciones de tiempo
+- **Historial de reservas** por usuario
+- **Simulación de pagos** con múltiples métodos
+- **Cálculo automático** de precios por hora
+- **Estados de reserva** (Confirmada, Cancelada, Completada)
 
 ### ✅ Dashboard Moderno
 - **Interfaz intuitiva** y responsive
@@ -222,70 +280,64 @@ Authorization: Bearer {token}
 - **Servicios modulares** y reutilizables
 - **Arquitectura escalable** y mantenible
 
-## 🔮 Funcionalidades Futuras
+## 🗄️ Modelo de Base de Datos
 
-- 📅 **Sistema de reservas** por fecha/hora
-- 💳 **Pasarela de pagos** integrada
-- 👥 **Panel de administración** avanzado
-- 📊 **Dashboard de estadísticas** y reportes
-- 🔔 **Sistema de notificaciones** en tiempo real
-- 📱 **Aplicación móvil** nativa
-- 🗓️ **Calendario de disponibilidad** interactivo
-- ⭐ **Sistema de reseñas** y comentarios
-- 🏆 **Programa de fidelización** para usuarios
-- 📍 **Integración con mapas** para ubicaciones
-
-## 🛠️ Comandos Útiles
-
-### Backend
-```bash
-# Restaurar paquetes
-dotnet restore
-
-# Crear nueva migración
-dotnet ef migrations add NombreMigracion
-
-# Aplicar migraciones
-dotnet ef database update
-
-# Ejecutar en desarrollo
-dotnet run
-
-# Compilar para producción
-dotnet publish -c Release
-
-# Ver ayuda de EF Core
-dotnet ef --help
+### Tabla: Users
+```sql
+- Id (int, PK)
+- Username (varchar, unique)
+- PasswordHash (varchar)
+- CreatedAt (timestamp)
+- UpdatedAt (timestamp)
 ```
 
-### Frontend
-```bash
-# Instalar dependencias
-npm install
+### Tabla: Canchas
+```sql
+- Id (int, PK)
+- Nombre (varchar)
+- Descripcion (text)
+- TipoDeporte (varchar)
+- Ubicacion (varchar)
+- PrecioPorHora (decimal)
+- ImagenPrincipal (varchar)
+- ImagenesAdicionales (json)
+- Calificacion (decimal)
+- NumeroCalificaciones (int)
+- Disponible (boolean)
+- Amenidades (json)
+- CreatedByUserId (int, FK)
+- CreatedAt (timestamp)
+```
 
-# Ejecutar en desarrollo
-ng serve
-
-# Compilar para producción
-ng build --configuration production
-
-# Ejecutar tests
-ng test
-
-# Generar componente
-ng generate component features/nombre-componente
-
-# Generar servicio
-ng generate service services/nombre-servicio
-
-# Linting del código
-ng lint
+### 🆕 Tabla: Reservas
+```sql
+- Id (int, PK)
+- CanchaId (int, FK)
+- UserId (int, FK)
+- FechaReserva (date)
+- HoraInicio (timestamp)
+- HoraFin (timestamp)
+- PrecioTotal (decimal)
+- Estado (varchar) -- Confirmada, Cancelada, Completada
+- NombreCliente (varchar)
+- EmailCliente (varchar)
+- TelefonoCliente (varchar)
+- MetodoPago (varchar)
+- Observaciones (text)
+- CreatedAt (timestamp)
+- UpdatedAt (timestamp)
 ```
 
 ## 🎨 Capturas de Pantalla
 
 ### Dashboard Principal
 *Interfaz principal con búsqueda avanzada y grid de canchas deportivas*
+
+### Sistema de Reservas
+*Formulario de reserva con selección de fecha/hora y simulación de pago*
+
+### Gestión de Reservas
+*Panel para ver, gestionar y cancelar reservas del usuario*
 
 ### Login/Register
 *Formularios modernos con validaciones en tiempo real y diseño responsive*
@@ -302,6 +354,9 @@ ng lint
 - **Swagger/OpenAPI** para documentación
 - **Validaciones** robustas en DTOs
 - **Arquitectura limpia** con separación de responsabilidades
+- **Manejo de fechas/horas** con TimeZone
+- **Validación de conflictos** de reservas
+- **Simulación de pagos** integrada
 
 ### Frontend (Angular 18)
 - **Standalone Components** modernos
@@ -310,6 +365,23 @@ ng lint
 - **Font Awesome** para iconografía
 - **CSS moderno** con variables y gradientes
 - **TypeScript** estricto para type safety
+- **Interceptores HTTP** para autenticación
+- **Guards de navegación** para rutas protegidas
+
+## 🚨 Notas Importantes
+
+### Sistema de Reservas
+- Las reservas se pueden cancelar hasta **2 horas antes** de la hora de inicio
+- El sistema valida automáticamente conflictos de horario
+- Los pagos son **simulados** para propósitos de demostración
+- Las horas disponibles van de **6:00 AM a 10:00 PM**
+- Se permite reservar con **bloques de 1 hora mínimo**
+
+### Seguridad
+- Todas las rutas de reservas requieren **autenticación JWT**
+- Los usuarios solo pueden ver y gestionar **sus propias reservas**
+- Las contraseñas se encriptan con **BCrypt**
+- Los tokens JWT expiran según configuración
 
 ## 🤝 Contribuciones
 
@@ -326,6 +398,7 @@ Las contribuciones son bienvenidas. Para contribuir:
 - Incluir tests para nuevas funcionalidades
 - Actualizar documentación cuando sea necesario
 - Mantener el estilo de código consistente
+- Usar migraciones de EF Core para cambios de BD
 
 ## 👨‍💻 Autor
 
@@ -337,5 +410,4 @@ Las contribuciones son bienvenidas. Para contribuir:
 
 ⭐ Si te gusta este proyecto, ¡dale una estrella en GitHub!
 
-🚀 **Estado del Proyecto**: Activamente desarrollado | **Versión**: 1.0.0 | **Última actualización**: Junio 2025
-`
+🚀 **Estado del Proyecto**: Activamente desarrollado | **Versión**: 2.0.0 | **Última actualización**: Junio 2025
