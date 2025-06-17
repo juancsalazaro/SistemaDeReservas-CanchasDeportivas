@@ -1,0 +1,445 @@
+<div class="detalle-page" *ngIf="!isLoading">
+  <div class="header-section">
+    <div class="container">
+      <button class="back-btn" (click)="router.navigate(['/dashboard'])">
+        <i class="fas fa-arrow-left"></i>
+        Volver al inicio
+      </button>
+    </div>
+  </div>
+
+  <div class="container" *ngIf="cancha">
+    <div class="cancha-hero">
+      <div class="hero-image">
+        <img [src]="getImageUrl(cancha.imagenPrincipal)" [alt]="cancha.nombre" class="main-image">
+        <div class="image-overlay">
+          <div class="sport-badge">{{ cancha.tipoDeporte }}</div>
+          <div class="price-badge">
+            {{ formatPrice(cancha.precioPorHora) }} <span>/hora</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-content">
+        <div class="cancha-header">
+          <h1 class="cancha-title">{{ cancha.nombre }}</h1>
+          <div class="cancha-rating" *ngIf="cancha.numeroCalificaciones > 0">
+            <i class="fas fa-star"></i>
+            <span class="rating-value">{{ cancha.calificacion.toFixed(1) }}</span>
+            <span class="rating-count">({{ cancha.numeroCalificaciones }} reseñas)</span>
+          </div>
+        </div>
+
+        <div class="cancha-location">
+          <i class="fas fa-map-marker-alt"></i>
+          {{ cancha.ubicacion }}
+        </div>
+
+        <p class="cancha-description">{{ cancha.descripcion }}</p>
+
+        <div class="amenidades-section" *ngIf="parseAmenidades(cancha.amenidades).length > 0">
+          <h3>Amenidades incluidas</h3>
+          <div class="amenidades-grid">
+            <div *ngFor="let amenidad of parseAmenidades(cancha.amenidades)" class="amenidad-item">
+              <i class="fas fa-check"></i>
+              <span>{{ amenidad }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="availability-section">
+          <div class="availability-status" [class.available]="cancha.disponible">
+            <i [class]="cancha.disponible ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
+            <span>{{ cancha.disponible ? 'Disponible para reservar' : 'No disponible' }}</span>
+          </div>
+        </div>
+
+        <div class="action-section">
+          <button
+            class="reserve-btn"
+            [disabled]="!cancha.disponible"
+            (click)="openReservaModal()"
+          >
+            <i class="fas fa-calendar-plus"></i>
+            Reservar ahora
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="additional-info">
+      <div class="info-card">
+        <h3><i class="fas fa-clock"></i> Horarios de atención</h3>
+        <p>Lunes a Domingo: 6:00 AM - 10:00 PM</p>
+      </div>
+
+      <div class="info-card">
+        <h3><i class="fas fa-info-circle"></i> Políticas</h3>
+        <ul>
+          <li>Reserva mínima de 1 hora</li>
+          <li>Máximo 3 horas por reserva</li>
+          <li>Cancelación gratuita hasta 2 horas antes</li>
+          <li>Pago requerido al momento de la reserva</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="messages-container">
+    <div class="alert alert-success" *ngIf="successMessage" role="alert">
+      <i class="fas fa-check-circle"></i>
+      {{ successMessage }}
+    </div>
+
+    <div class="alert alert-danger" *ngIf="errorMessage" role="alert">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{ errorMessage }}
+    </div>
+  </div>
+</div>
+
+<div class="loading-container" *ngIf="isLoading">
+  <div class="loading-spinner">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Cargando información de la cancha...</p>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showReservaModal" (click)="closeReservaModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Reservar {{ cancha?.nombre }}</h2>
+      <button class="close-btn" (click)="closeReservaModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form [formGroup]="reservaForm" (ngSubmit)="onReservaSubmit()">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-calendar"></i>
+            Fecha de reserva
+          </label>
+          <input
+            type="date"
+            formControlName="fechaReserva"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid(reservaForm, 'fechaReserva')"
+            [min]="fechaMinima"
+            (change)="onFechaChange()"
+          />
+          <div class="invalid-feedback" *ngIf="isFieldInvalid(reservaForm, 'fechaReserva')">
+            {{ getErrorMessage(reservaForm, 'fechaReserva') }}
+          </div>
+        </div>
+
+        <div class="horarios-section" *ngIf="reservaForm.get('fechaReserva')?.value">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-clock"></i>
+                Hora de inicio
+              </label>
+              <select
+                formControlName="horaInicio"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid(reservaForm, 'horaInicio')"
+              >
+                <option value="">Seleccionar hora</option>
+                <option
+                  *ngFor="let horario of horariosDisponibles"
+                  [value]="horario.value"
+                  [disabled]="!isHorarioDisponible(horario.value)"
+                >
+                  {{ horario.label }}
+                </option>
+              </select>
+              <div class="invalid-feedback" *ngIf="isFieldInvalid(reservaForm, 'horaInicio')">
+                {{ getErrorMessage(reservaForm, 'horaInicio') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-clock"></i>
+                Hora de fin
+              </label>
+              <select
+                formControlName="horaFin"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid(reservaForm, 'horaFin')"
+              >
+                <option value="">Seleccionar hora</option>
+                <option
+                  *ngFor="let horario of horariosDisponibles"
+                  [value]="horario.value"
+                >
+                  {{ horario.label }}
+                </option>
+              </select>
+              <div class="invalid-feedback" *ngIf="isFieldInvalid(reservaForm, 'horaFin')">
+                {{ getErrorMessage(reservaForm, 'horaFin') }}
+              </div>
+            </div>
+          </div>
+
+          <div class="price-summary" *ngIf="calcularPrecioTotal() > 0">
+            <div class="price-item">
+              <span>Precio por hora:</span>
+              <span>{{ formatPrice(cancha!.precioPorHora) }}</span>
+            </div>
+            <div class="price-total">
+              <span>Total estimado:</span>
+              <span>{{ formatPrice(calcularPrecioTotal()) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cliente-section">
+          <h3>Información del cliente</h3>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-user"></i>
+              Nombre completo
+            </label>
+            <input
+              type="text"
+              formControlName="nombreCliente"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid(reservaForm, 'nombreCliente')"
+              placeholder="Ingresa tu nombre completo"
+            />
+            <div class="invalid-feedback" *ngIf="isFieldInvalid(reservaForm, 'nombreCliente')">
+              {{ getErrorMessage(reservaForm, 'nombreCliente') }}
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-envelope"></i>
+                Email
+              </label>
+              <input
+                type="email"
+                formControlName="emailCliente"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid(reservaForm, 'emailCliente')"
+                placeholder="correo@ejemplo.com"
+              />
+              <div class="invalid-feedback" *ngIf="isFieldInvalid(reservaForm, 'emailCliente')">
+                {{ getErrorMessage(reservaForm, 'emailCliente') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-phone"></i>
+                Teléfono
+              </label>
+              <input
+                type="tel"
+                formControlName="telefonoCliente"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid(reservaForm, 'telefonoCliente')"
+                placeholder="3001234567"
+                maxlength="10"
+              />
+              <div class="invalid-feedback" *ngIf="isFieldInvalid(reservaForm, 'telefonoCliente')">
+                {{ getErrorMessage(reservaForm, 'telefonoCliente') }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-comment"></i>
+              Observaciones (opcional)
+            </label>
+            <textarea
+              formControlName="observaciones"
+              class="form-control"
+              rows="3"
+              placeholder="Comentarios adicionales..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="disponibilidad-info" *ngIf="disponibilidad && !isLoadingDisponibilidad">
+          <h4>Reservas activas para esta fecha:</h4>
+          <div class="reservas-activas" *ngIf="disponibilidad.reservasActivas.length > 0; else noReservas">
+            <div *ngFor="let reserva of disponibilidad.reservasActivas" class="reserva-activa">
+              <i class="fas fa-calendar-check"></i>
+              <span>
+                {{ formatTime(reserva.horaInicio) }} - {{ formatTime(reserva.horaFin) }}
+                ({{ reserva.nombreCliente }})
+              </span>
+            </div>
+          </div>
+          <ng-template #noReservas>
+            <p class="no-reservas">
+              <i class="fas fa-check-circle"></i>
+              No hay reservas para esta fecha
+            </p>
+          </ng-template>
+        </div>
+
+        <div class="loading-disponibilidad" *ngIf="isLoadingDisponibilidad">
+          <i class="fas fa-spinner fa-spin"></i>
+          Verificando disponibilidad...
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeReservaModal()">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="reservaForm.invalid || calcularPrecioTotal() <= 0"
+        >
+          Continuar al pago
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showPagoModal" (click)="closePagoModal()">
+  <div class="modal-content pago-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Procesar pago</h2>
+      <button class="close-btn" (click)="closePagoModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form [formGroup]="pagoForm" (ngSubmit)="onPagoSubmit()">
+      <div class="modal-body">
+        <div class="reserva-summary">
+          <h3>Resumen de tu reserva</h3>
+          <div class="summary-item">
+            <span>Cancha:</span>
+            <span>{{ cancha?.nombre }}</span>
+          </div>
+          <div class="summary-item">
+            <span>Fecha:</span>
+            <span>{{ formatDate(reservaForm.get('fechaReserva')?.value) }}</span>
+          </div>
+          <div class="summary-item">
+            <span>Horario:</span>
+            <span>
+              {{ reservaForm.get('horaInicio')?.value }} - {{ reservaForm.get('horaFin')?.value }}
+            </span>
+          </div>
+          <div class="summary-total">
+            <span>Total a pagar:</span>
+            <span>{{ formatPrice(calcularPrecioTotal()) }}</span>
+          </div>
+        </div>
+
+        <div class="pago-section">
+          <div class="form-group">
+            <label class="form-label">Tipo de tarjeta</label>
+            <select formControlName="tipoTarjeta" class="form-control">
+              <option value="Visa">Visa</option>
+              <option value="Mastercard">Mastercard</option>
+              <option value="American Express">American Express</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-credit-card"></i>
+              Número de tarjeta
+            </label>
+            <input
+              type="text"
+              formControlName="numeroTarjeta"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid(pagoForm, 'numeroTarjeta')"
+              placeholder="1234 5678 9012 3456"
+              maxlength="19"
+            />
+            <div class="invalid-feedback" *ngIf="isFieldInvalid(pagoForm, 'numeroTarjeta')">
+              {{ getErrorMessage(pagoForm, 'numeroTarjeta') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-user"></i>
+              Nombre en la tarjeta
+            </label>
+            <input
+              type="text"
+              formControlName="nombreTarjeta"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid(pagoForm, 'nombreTarjeta')"
+              placeholder="JUAN CARLOS SALAZAR"
+            />
+            <div class="invalid-feedback" *ngIf="isFieldInvalid(pagoForm, 'nombreTarjeta')">
+              {{ getErrorMessage(pagoForm, 'nombreTarjeta') }}
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-calendar"></i>
+                Vencimiento
+              </label>
+              <input
+                type="text"
+                formControlName="fechaVencimiento"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid(pagoForm, 'fechaVencimiento')"
+                placeholder="MM/YY"
+                maxlength="5"
+              />
+              <div class="invalid-feedback" *ngIf="isFieldInvalid(pagoForm, 'fechaVencimiento')">
+                {{ getErrorMessage(pagoForm, 'fechaVencimiento') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-lock"></i>
+                CVV
+              </label>
+              <input
+                type="text"
+                formControlName="cvv"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid(pagoForm, 'cvv')"
+                placeholder="123"
+                maxlength="4"
+              />
+              <div class="invalid-feedback" *ngIf="isFieldInvalid(pagoForm, 'cvv')">
+                {{ getErrorMessage(pagoForm, 'cvv') }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closePagoModal()">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-success"
+          [disabled]="pagoForm.invalid || isLoadingReserva"
+        >
+          <span *ngIf="isLoadingReserva" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!isLoadingReserva" class="fas fa-credit-card me-2"></i>
+          {{ isLoadingReserva ? 'Procesando...' : 'Pagar ' + formatPrice(calcularPrecioTotal()) }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

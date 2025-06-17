@@ -9,7 +9,7 @@ import { CanchaResponseDto, CanchaFilters } from '../../models/cancha.dto';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule], // Agregar RouterModule aquí
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -21,7 +21,6 @@ export class DashboardComponent implements OnInit {
   selectedSport = '';
   maxPrice: number | null = null;
 
-  // Filtros para el buscador
   filters: CanchaFilters = {};
 
   constructor(
@@ -37,7 +36,6 @@ export class DashboardComponent implements OnInit {
   private loadData(): void {
     this.isLoading = true;
 
-    // Cargar canchas y tipos de deporte en paralelo
     Promise.all([
       this.canchasService.getCanchas().toPromise(),
       this.canchasService.getTiposDeporte().toPromise()
@@ -61,7 +59,6 @@ export class DashboardComponent implements OnInit {
     this.isLoading = true;
     this.canchasService.getCanchas(this.filters).subscribe({
       next: (canchas) => {
-        // Filtrar también por ubicación en frontend
         if (this.searchLocation.trim()) {
           this.canchas = canchas.filter(cancha =>
             cancha.ubicacion.toLowerCase().includes(this.searchLocation.toLowerCase())
@@ -99,7 +96,14 @@ export class DashboardComponent implements OnInit {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
-  // Helpers para el template
+  navigateToReservas(): void {
+    this.router.navigate(['/mis-reservas']);
+  }
+
+  navigateToCrearCancha(): void {
+    this.router.navigate(['/crear-cancha']);
+  }
+
   getStarArray(rating: number): number[] {
     return Array(5).fill(0).map((_, i) => i < Math.floor(rating) ? 1 : 0);
   }
@@ -116,18 +120,15 @@ export class DashboardComponent implements OnInit {
     if (imagenPrincipal) {
       return imagenPrincipal;
     }
-    // Imagen por defecto según el tipo de deporte
     return 'assets/default-cancha.jpg';
   }
 
   parseAmenidades(amenidades: string | null | undefined): string[] {
     if (!amenidades) return [];
     try {
-      // Si es un JSON array válido
       const parsed = JSON.parse(amenidades);
       return Array.isArray(parsed) ? parsed : [];
     } catch {
-      // Si es un string separado por comas
       return amenidades.split(',').map(a => a.trim()).filter(a => a.length > 0);
     }
   }

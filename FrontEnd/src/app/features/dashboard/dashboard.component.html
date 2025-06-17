@@ -1,5 +1,4 @@
 <div class="dashboard-page">
-  <!-- Header Navigation -->
   <header class="dashboard-header">
     <div class="container">
       <nav class="navbar">
@@ -13,9 +12,13 @@
             <i class="fas fa-home"></i>
             Inicio
           </button>
-          <button class="nav-item">
+          <button class="nav-item" (click)="navigateToReservas()">
             <i class="fas fa-calendar-alt"></i>
             Mis Reservas
+          </button>
+          <button class="nav-item" (click)="navigateToCrearCancha()">
+            <i class="fas fa-plus-circle"></i>
+            Crear Cancha
           </button>
           <div class="user-menu">
             <button class="user-avatar" (click)="logout()">
@@ -28,7 +31,6 @@
     </div>
   </header>
 
-  <!-- Search Bar Section -->
   <section class="search-section">
     <div class="container">
       <div class="search-card">
@@ -82,7 +84,6 @@
     </div>
   </section>
 
-  <!-- Sports Categories -->
   <section class="categories-section">
     <div class="container">
       <div class="categories-scroll">
@@ -107,10 +108,8 @@
     </div>
   </section>
 
-  <!-- Results Section -->
   <section class="results-section">
     <div class="container">
-      <!-- Results Header -->
       <div class="results-header">
         <h2 class="results-title">
           <span *ngIf="!searchLocation && !selectedSport">Canchas disponibles</span>
@@ -123,7 +122,6 @@
         <p class="results-count">{{ canchas.length }} canchas encontradas</p>
       </div>
 
-      <!-- Loading State -->
       <div *ngIf="isLoading" class="loading-state">
         <div class="loading-grid">
           <div *ngFor="let item of [1,2,3,4,5,6]" class="loading-card">
@@ -137,14 +135,12 @@
         </div>
       </div>
 
-      <!-- Canchas Grid -->
       <div *ngIf="!isLoading" class="canchas-grid">
         <div
           *ngFor="let cancha of canchas"
           class="cancha-card"
           (click)="viewCancha(cancha.id)"
         >
-          <!-- Image -->
           <div class="cancha-image-container">
             <img
               [src]="getImageUrl(cancha.imagenPrincipal)"
@@ -158,7 +154,6 @@
             <div class="sport-badge">{{ cancha.tipoDeporte }}</div>
           </div>
 
-          <!-- Content -->
           <div class="cancha-content">
             <div class="cancha-header">
               <h3 class="cancha-name">{{ cancha.nombre }}</h3>
@@ -176,7 +171,6 @@
 
             <p class="cancha-description">{{ cancha.descripcion }}</p>
 
-            <!-- Amenidades -->
             <div class="amenidades" *ngIf="parseAmenidades(cancha.amenidades).length > 0">
               <span
                 *ngFor="let amenidad of parseAmenidades(cancha.amenidades).slice(0, 3)"
@@ -206,7 +200,6 @@
         </div>
       </div>
 
-      <!-- Empty State -->
       <div *ngIf="!isLoading && canchas.length === 0" class="empty-state">
         <div class="empty-icon">
           <i class="fas fa-search"></i>

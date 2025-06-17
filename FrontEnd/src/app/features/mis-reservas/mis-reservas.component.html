@@ -1,0 +1,307 @@
+<div class="reservas-page">
+  <header class="reservas-header">
+    <div class="container">
+      <nav class="navbar">
+        <div class="nav-brand">
+          <i class="fas fa-futbol brand-icon"></i>
+          <span class="brand-text">ReservaCanchas</span>
+        </div>
+
+        <div class="nav-menu">
+          <button class="nav-item" (click)="navigateToDashboard()">
+            <i class="fas fa-home"></i>
+            <span>Inicio</span>
+          </button>
+          <button class="nav-item active">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Mis Reservas</span>
+          </button>
+          <div class="user-menu">
+            <button class="user-avatar" (click)="logout()">
+              <i class="fas fa-user"></i>
+              <span>Salir</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">
+          <i class="fas fa-calendar-alt"></i>
+          Mis Reservas
+        </h1>
+        <p class="page-subtitle">Gestiona todas tus reservas de canchas deportivas</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-card">
+          <div class="stat-value">{{ reservas.length }}</div>
+          <div class="stat-label">Total</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="filters-section">
+      <div class="filters-container">
+        <div class="filter-group">
+          <label class="filter-label">
+            <i class="fas fa-filter"></i>
+            Estado
+          </label>
+          <select
+            class="filter-select"
+            [(ngModel)]="filtroEstado"
+            (change)="onFiltroEstadoChange(filtroEstado)"
+          >
+            <option value="todas">Todas</option>
+            <option value="confirmada">Confirmadas</option>
+            <option value="cancelada">Canceladas</option>
+            <option value="completada">Completadas</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">
+            <i class="fas fa-calendar"></i>
+            Fecha
+          </label>
+          <select
+            class="filter-select"
+            [(ngModel)]="filtroFecha"
+            (change)="onFiltroFechaChange(filtroFecha)"
+          >
+            <option value="todas">Todas</option>
+            <option value="hoy">Hoy</option>
+            <option value="proximas">Próximas</option>
+            <option value="pasadas">Pasadas</option>
+          </select>
+        </div>
+
+        <div class="filter-results">
+          <span class="results-count">
+            {{ reservasFiltradas.length }} reserva{{ reservasFiltradas.length !== 1 ? 's' : '' }} encontrada{{ reservasFiltradas.length !== 1 ? 's' : '' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-grid">
+        <div *ngFor="let item of [1,2,3,4]" class="loading-card">
+          <div class="loading-header"></div>
+          <div class="loading-content">
+            <div class="loading-line loading-title"></div>
+            <div class="loading-line loading-subtitle"></div>
+            <div class="loading-line loading-details"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading" class="reservas-content">
+      <div *ngIf="reservasFiltradas.length > 0" class="reservas-grid">
+        <div
+          *ngFor="let reserva of reservasFiltradas"
+          class="reserva-card"
+          [class.reserva-pasada]="isReservaPasada(reserva)"
+          [class.reserva-hoy]="isReservaHoy(reserva)"
+        >
+          <div class="reserva-header">
+            <div class="reserva-info">
+              <h3 class="reserva-cancha" (click)="viewCancha(reserva.canchaId)">
+                {{ reserva.nombreCancha }}
+              </h3>
+              <p class="reserva-fecha">
+                <i class="fas fa-calendar"></i>
+                {{ formatDate(reserva.fechaReserva) }}
+              </p>
+            </div>
+            <div class="reserva-estado">
+              <span class="estado-badge" [ngClass]="getEstadoClass(reserva.estado)">
+                <i [class]="getEstadoIcon(reserva.estado)"></i>
+                {{ reserva.estado }}
+              </span>
+            </div>
+          </div>
+
+          <div class="reserva-details">
+            <div class="detail-item">
+              <i class="fas fa-clock"></i>
+              <span class="detail-label">Horario:</span>
+              <span class="detail-value">
+                {{ formatTime(reserva.horaInicio) }} - {{ formatTime(reserva.horaFin) }}
+              </span>
+            </div>
+
+            <div class="detail-item">
+              <i class="fas fa-user"></i>
+              <span class="detail-label">Cliente:</span>
+              <span class="detail-value">{{ reserva.nombreCliente }}</span>
+            </div>
+
+            <div class="detail-item">
+              <i class="fas fa-envelope"></i>
+              <span class="detail-label">Email:</span>
+              <span class="detail-value">{{ reserva.emailCliente }}</span>
+            </div>
+
+            <div class="detail-item">
+              <i class="fas fa-phone"></i>
+              <span class="detail-label">Teléfono:</span>
+              <span class="detail-value">{{ reserva.telefonoCliente }}</span>
+            </div>
+
+            <div class="detail-item" *ngIf="reserva.metodoPago">
+              <i class="fas fa-credit-card"></i>
+              <span class="detail-label">Pago:</span>
+              <span class="detail-value">{{ reserva.metodoPago }}</span>
+            </div>
+
+            <div class="detail-item" *ngIf="reserva.observaciones">
+              <i class="fas fa-comment"></i>
+              <span class="detail-label">Observaciones:</span>
+              <span class="detail-value">{{ reserva.observaciones }}</span>
+            </div>
+          </div>
+
+          <div class="reserva-footer">
+            <div class="reserva-price">
+              <span class="price-label">Total pagado:</span>
+              <span class="price-value">{{ formatPrice(reserva.precioTotal) }}</span>
+            </div>
+
+            <div class="reserva-actions">
+              <div class="time-info" *ngIf="!isReservaPasada(reserva) && reserva.estado.toLowerCase() === 'confirmada'">
+                <i class="fas fa-hourglass-half"></i>
+                {{ getTimeUntilReserva(reserva) }}
+              </div>
+
+              <button
+                *ngIf="canCancelReserva(reserva)"
+                class="btn btn-danger btn-sm"
+                (click)="openCancelModal(reserva)"
+              >
+                <i class="fas fa-times"></i>
+                Cancelar
+              </button>
+
+              <button
+                class="btn btn-outline btn-sm"
+                (click)="viewCancha(reserva.canchaId)"
+              >
+                <i class="fas fa-eye"></i>
+                Ver cancha
+              </button>
+            </div>
+          </div>
+
+          <div class="reserva-indicator" *ngIf="isReservaHoy(reserva) && reserva.estado.toLowerCase() === 'confirmada'">
+            <i class="fas fa-star"></i>
+            <span>¡Reserva para hoy!</span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="reservasFiltradas.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-calendar-times"></i>
+        </div>
+        <h3 class="empty-title">No tienes reservas</h3>
+        <p class="empty-description">
+          <span *ngIf="filtroEstado === 'todas' && filtroFecha === 'todas'">
+            Aún no has realizado ninguna reserva. ¡Encuentra tu cancha ideal y haz tu primera reserva!
+          </span>
+          <span *ngIf="filtroEstado !== 'todas' || filtroFecha !== 'todas'">
+            No se encontraron reservas con los filtros seleccionados. Intenta ajustar los filtros.
+          </span>
+        </p>
+        <button class="btn btn-primary" (click)="navigateToDashboard()">
+          <i class="fas fa-search"></i>
+          Buscar canchas
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="messages-container">
+    <div class="alert alert-success" *ngIf="successMessage" role="alert">
+      <i class="fas fa-check-circle"></i>
+      {{ successMessage }}
+    </div>
+
+    <div class="alert alert-danger" *ngIf="errorMessage" role="alert">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{ errorMessage }}
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showCancelModal" (click)="closeCancelModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Confirmar cancelación</h2>
+      <button class="close-btn" (click)="closeCancelModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="reservaParaCancelar">
+      <div class="cancel-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>¿Estás seguro de que deseas cancelar esta reserva?</p>
+      </div>
+
+      <div class="reserva-summary">
+        <h4>Detalles de la reserva:</h4>
+        <div class="summary-item">
+          <span>Cancha:</span>
+          <span>{{ reservaParaCancelar.nombreCancha }}</span>
+        </div>
+        <div class="summary-item">
+          <span>Fecha:</span>
+          <span>{{ formatDate(reservaParaCancelar.fechaReserva) }}</span>
+        </div>
+        <div class="summary-item">
+          <span>Horario:</span>
+          <span>
+            {{ formatTime(reservaParaCancelar.horaInicio) }} -
+            {{ formatTime(reservaParaCancelar.horaFin) }}
+          </span>
+        </div>
+        <div class="summary-item">
+          <span>Total:</span>
+          <span>{{ formatPrice(reservaParaCancelar.precioTotal) }}</span>
+        </div>
+      </div>
+
+      <div class="cancel-info">
+        <p><strong>Política de cancelación:</strong></p>
+        <ul>
+          <li>Cancelación gratuita hasta 2 horas antes de la reserva</li>
+          <li>El reembolso se procesará en 2-3 días hábiles</li>
+          <li>Esta acción no se puede deshacer</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="closeCancelModal()">
+        No, mantener reserva
+      </button>
+      <button
+        type="button"
+        class="btn btn-danger"
+        (click)="confirmarCancelacion()"
+        [disabled]="isLoadingCancel"
+      >
+        <span *ngIf="isLoadingCancel" class="spinner-border spinner-border-sm me-2"></span>
+        <i *ngIf="!isLoadingCancel" class="fas fa-times me-2"></i>
+        {{ isLoadingCancel ? 'Cancelando...' : 'Sí, cancelar reserva' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,375 @@
+<div class="crear-cancha-page">
+  <header class="header-section">
+    <div class="container">
+      <nav class="navbar">
+        <div class="nav-brand">
+          <i class="fas fa-futbol brand-icon"></i>
+          <span class="brand-text">ReservaCanchas</span>
+        </div>
+
+        <div class="nav-menu">
+          <button class="nav-item" (click)="navigateToDashboard()">
+            <i class="fas fa-home"></i>
+            <span>Inicio</span>
+          </button>
+          <button class="nav-item active">
+            <i class="fas fa-plus-circle"></i>
+            <span>Crear Cancha</span>
+          </button>
+          <div class="user-menu">
+            <button class="user-avatar" (click)="logout()">
+              <i class="fas fa-user"></i>
+              <span>Salir</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">
+          <i class="fas fa-plus-circle"></i>
+          Crear Nueva Cancha
+        </h1>
+        <p class="page-subtitle">
+          Comparte tu cancha deportiva con la comunidad y genera ingresos adicionales
+        </p>
+      </div>
+      <button class="back-btn" (click)="navigateToDashboard()">
+        <i class="fas fa-arrow-left"></i>
+        <span>Volver</span>
+      </button>
+    </div>
+
+    <div class="form-container">
+      <form [formGroup]="canchaForm" (ngSubmit)="onSubmit()" class="cancha-form">
+
+        <div class="form-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <i class="fas fa-info-circle"></i>
+              Información Básica
+            </h2>
+            <p class="section-subtitle">Datos principales de tu cancha</p>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-tag"></i>
+                Nombre de la cancha *
+              </label>
+              <input
+                type="text"
+                formControlName="nombre"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('nombre')"
+                placeholder="Ej: Cancha La Victoria"
+              />
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('nombre')">
+                {{ getErrorMessage('nombre') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-running"></i>
+                Tipo de deporte *
+              </label>
+              <select
+                formControlName="tipoDeporte"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('tipoDeporte')"
+              >
+                <option value="">Seleccionar deporte</option>
+                <option *ngFor="let tipo of tiposDeporte" [value]="tipo">
+                  {{ tipo }}
+                </option>
+              </select>
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('tipoDeporte')">
+                {{ getErrorMessage('tipoDeporte') }}
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label class="form-label">
+                <i class="fas fa-align-left"></i>
+                Descripción *
+              </label>
+              <textarea
+                formControlName="descripcion"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('descripcion')"
+                rows="4"
+                placeholder="Describe tu cancha: dimensiones, características especiales, estado, etc."
+              ></textarea>
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('descripcion')">
+                {{ getErrorMessage('descripcion') }}
+              </div>
+              <div class="form-help">
+                {{ canchaForm.get('descripcion')?.value?.length || 0 }}/500 caracteres
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <i class="fas fa-map-marker-alt"></i>
+              Ubicación y Precio
+            </h2>
+            <p class="section-subtitle">Dónde está ubicada y cuánto cuesta</p>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-map-marker-alt"></i>
+                Ubicación completa *
+              </label>
+              <input
+                type="text"
+                formControlName="ubicacion"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('ubicacion')"
+                placeholder="Ej: Calle 123 #45-67, Barrio Centro, Manizales"
+              />
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('ubicacion')">
+                {{ getErrorMessage('ubicacion') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-dollar-sign"></i>
+                Precio por hora *
+              </label>
+              <div class="price-input-container">
+                <span class="price-currency">$</span>
+                <input
+                  type="number"
+                  formControlName="precioPorHora"
+                  class="form-control price-input"
+                  [class.is-invalid]="isFieldInvalid('precioPorHora')"
+                  placeholder="50000"
+                  min="1000"
+                  max="500000"
+                />
+                <span class="price-period">COP/hora</span>
+              </div>
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('precioPorHora')">
+                {{ getErrorMessage('precioPorHora') }}
+              </div>
+              <div class="price-preview" *ngIf="canchaForm.get('precioPorHora')?.value">
+                <strong>Vista previa:</strong> {{ formatPrice(canchaForm.get('precioPorHora')?.value) }}/hora
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <i class="fas fa-camera"></i>
+              Imagen Principal
+            </h2>
+            <p class="section-subtitle">Agrega una foto atractiva de tu cancha (opcional)</p>
+          </div>
+
+          <div class="image-upload-section">
+            <div class="image-upload-area" *ngIf="!imagePreview">
+              <input
+                type="file"
+                id="imagenPrincipal"
+                accept="image/*"
+                (change)="onImageSelected($event)"
+                class="image-input"
+              />
+              <label for="imagenPrincipal" class="image-upload-label">
+                <div class="upload-content">
+                  <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                  <h3>Subir imagen</h3>
+                  <p>Haz clic aquí o arrastra una imagen</p>
+                  <span class="upload-specs">PNG, JPG hasta 5MB</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="image-preview-container" *ngIf="imagePreview">
+              <img [src]="imagePreview" alt="Preview" class="image-preview" />
+              <div class="image-actions">
+                <button type="button" class="btn btn-danger btn-sm" (click)="removeImage()">
+                  <i class="fas fa-trash"></i>
+                  Eliminar
+                </button>
+                <label for="imagenPrincipal" class="btn btn-secondary btn-sm">
+                  <i class="fas fa-sync"></i>
+                  Cambiar
+                </label>
+                <input
+                  type="file"
+                  id="imagenPrincipal"
+                  accept="image/*"
+                  (change)="onImageSelected($event)"
+                  class="image-input"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <i class="fas fa-list-check"></i>
+              Amenidades
+            </h2>
+            <p class="section-subtitle">Selecciona las comodidades que ofrece tu cancha</p>
+          </div>
+
+          <div class="amenidades-grid">
+            <div
+              *ngFor="let amenidad of amenidadesDisponibles"
+              class="amenidad-option"
+              [class.selected]="isAmenidadSeleccionada(amenidad)"
+              (click)="toggleAmenidad(amenidad)"
+            >
+              <div class="amenidad-checkbox">
+                <i [class]="isAmenidadSeleccionada(amenidad) ? 'fas fa-check-circle' : 'far fa-circle'"></i>
+              </div>
+              <span class="amenidad-text">{{ amenidad }}</span>
+            </div>
+          </div>
+
+          <div class="selected-amenidades" *ngIf="amenidadesSeleccionadas.length > 0">
+            <h4>Amenidades seleccionadas ({{ amenidadesSeleccionadas.length }}):</h4>
+            <div class="amenidades-tags">
+              <span
+                *ngFor="let amenidad of amenidadesSeleccionadas"
+                class="amenidad-tag"
+              >
+                {{ amenidad }}
+                <i class="fas fa-times" (click)="toggleAmenidad(amenidad)"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <i class="fas fa-toggle-on"></i>
+              Disponibilidad
+            </h2>
+            <p class="section-subtitle">Configura si tu cancha está disponible para reservas</p>
+          </div>
+
+          <div class="availability-toggle">
+            <label class="toggle-container">
+              <input
+                type="checkbox"
+                formControlName="disponible"
+                class="toggle-input"
+              />
+              <div class="toggle-slider">
+                <div class="toggle-circle"></div>
+              </div>
+              <span class="toggle-label">
+                <strong>Cancha disponible para reservas</strong>
+                <small>Los usuarios podrán encontrar y reservar tu cancha</small>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-section" *ngIf="canchaForm.get('nombre')?.value && canchaForm.get('tipoDeporte')?.value">
+          <div class="section-header">
+            <h2 class="section-title">
+              <i class="fas fa-eye"></i>
+              Vista Previa
+            </h2>
+            <p class="section-subtitle">Así verán tu cancha los usuarios</p>
+          </div>
+
+          <div class="cancha-preview">
+            <div class="preview-image">
+              <img
+                [src]="imagePreview || 'assets/default-cancha.jpg'"
+                [alt]="canchaForm.get('nombre')?.value"
+                class="preview-img"
+              />
+              <div class="preview-sport-badge">{{ canchaForm.get('tipoDeporte')?.value }}</div>
+            </div>
+            <div class="preview-content">
+              <h3 class="preview-title">{{ canchaForm.get('nombre')?.value }}</h3>
+              <p class="preview-location">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ canchaForm.get('ubicacion')?.value || 'Ubicación no especificada' }}
+              </p>
+              <p class="preview-description">
+                {{ canchaForm.get('descripcion')?.value || 'Sin descripción' }}
+              </p>
+              <div class="preview-amenidades" *ngIf="amenidadesSeleccionadas.length > 0">
+                <span
+                  *ngFor="let amenidad of amenidadesSeleccionadas.slice(0, 3)"
+                  class="preview-amenidad"
+                >
+                  {{ amenidad }}
+                </span>
+                <span *ngIf="amenidadesSeleccionadas.length > 3" class="preview-more">
+                  +{{ amenidadesSeleccionadas.length - 3 }} más
+                </span>
+              </div>
+              <div class="preview-price">
+                <span class="preview-price-amount">
+                  {{ formatPrice(canchaForm.get('precioPorHora')?.value || 0) }}
+                </span>
+                <span class="preview-price-period">/hora</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="navigateToDashboard()"
+          >
+            <i class="fas fa-times"></i>
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="canchaForm.invalid || isLoading"
+          >
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+            <i *ngIf="!isLoading" class="fas fa-plus-circle me-2"></i>
+            {{ isLoading ? 'Creando cancha...' : 'Crear Cancha' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="messages-container">
+    <div class="alert alert-success" *ngIf="successMessage" role="alert">
+      <i class="fas fa-check-circle"></i>
+      {{ successMessage }}
+    </div>
+
+    <div class="alert alert-danger" *ngIf="errorMessage" role="alert">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{ errorMessage }}
+      <button type="button" class="alert-close" (click)="clearMessages()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+</div>
