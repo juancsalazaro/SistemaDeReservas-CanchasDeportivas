@@ -23,7 +23,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-// Configuración de Swagger para que entienda JWT
+// Configuraciï¿½n de Swagger para que entienda JWT
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -33,7 +33,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Introduce 'Bearer' [espacio] y después tu token en el campo de texto.\n\nEjemplo: \"Bearer 12345abcdef\""
+        Description = "Introduce 'Bearer' [espacio] y despuï¿½s tu token en el campo de texto.\n\nEjemplo: \"Bearer 12345abcdef\""
     });
 
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement

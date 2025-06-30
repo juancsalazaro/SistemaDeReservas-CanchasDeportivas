@@ -25,7 +25,7 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private canchasService: CanchasService,
-    private authService: AuthService,
+    public authService: AuthService, // Hacer público para usar en template
     private router: Router
   ) { }
 
@@ -96,14 +96,55 @@ export class DashboardComponent implements OnInit {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
+
+  // Métodos para manejo de roles y navegación
   navigateToReservas(): void {
-    this.router.navigate(['/mis-reservas']);
+    if (this.authService.isCliente()) {
+      this.router.navigate(['/mis-reservas']);
+    } else {
+      alert('Solo los clientes pueden ver sus reservas');
+    }
   }
 
   navigateToCrearCancha(): void {
-    this.router.navigate(['/crear-cancha']);
+    if (this.authService.canCreateCanchas()) {
+      this.router.navigate(['/crear-cancha']);
+    } else {
+      alert('No tienes permisos para crear canchas');
+    }
   }
 
+  // Métodos para obtener información del usuario
+  getUsername(): string {
+    return this.authService.getUsername() || 'Usuario';
+  }
+
+  getUserRole(): string {
+    const role = this.authService.getUserRole();
+    return role || 'Sin rol';
+  }
+
+  getRoleClass(): string {
+    const role = this.authService.getUserRole();
+    switch(role) {
+      case 'Administrador': return 'role-admin';
+      case 'Cliente': return 'role-cliente';
+      case 'Empleado': return 'role-empleado';
+      default: return 'role-default';
+    }
+  }
+
+  getRoleIcon(): string {
+    const role = this.authService.getUserRole();
+    switch(role) {
+      case 'Administrador': return 'fas fa-crown';
+      case 'Cliente': return 'fas fa-user';
+      case 'Empleado': return 'fas fa-user-tie';
+      default: return 'fas fa-question';
+    }
+  }
+
+  // Métodos existentes
   getStarArray(rating: number): number[] {
     return Array(5).fill(0).map((_, i) => i < Math.floor(rating) ? 1 : 0);
   }

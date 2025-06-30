@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SistemaReservasApi.Enums;
 using SistemaReservasApi.Models;
 
 namespace SistemaReservasApi.Data
@@ -25,10 +26,16 @@ namespace SistemaReservasApi.Data
                 entity.Property(e => e.Id).UseIdentityByDefaultColumn();
                 entity.Property(e => e.Username).HasMaxLength(100).IsRequired();
                 entity.Property(e => e.PasswordHash).IsRequired();
+                entity.Property(e => e.Rol)
+                .HasConversion<string>()
+                .HasMaxLength(50)
+                .IsRequired()
+                .HasDefaultValue(UserRole.Cliente);
                 entity.Property(e => e.IsActive).HasColumnType("boolean").HasDefaultValue(true);
                 entity.Property(e => e.CreatedAt).HasColumnType("timestamp with time zone").HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.UpdatedAt).HasColumnType("timestamp with time zone");
                 entity.HasIndex(e => e.Username).IsUnique().HasDatabaseName("IX_users_username");
+                entity.HasIndex(e => e.Rol).HasDatabaseName("IX_users_rol");
             });
 
             // Configuración para la tabla canchas

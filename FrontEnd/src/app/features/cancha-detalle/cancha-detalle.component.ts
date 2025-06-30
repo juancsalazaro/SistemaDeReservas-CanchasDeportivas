@@ -6,6 +6,7 @@ import { CanchasService } from '../../services/canchas.service';
 import { ReservasService } from '../../services/reservas.service';
 import { CanchaResponseDto } from '../../models/cancha.dto';
 import { DisponibilidadResponseDto, ReservaDto, PagoSimuladoDto } from '../../models/reserva.dto';
+import { AuthService } from 'src/app/core/auth.service';
 
 @Component({
   selector: 'app-cancha-detalle',
@@ -52,6 +53,7 @@ export class CanchaDetalleComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    public authService: AuthService,
     private router: Router,
     private fb: FormBuilder,
     private canchasService: CanchasService,

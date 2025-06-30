@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using SistemaReservasApi.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace SistemaReservasApi.Models
 {
@@ -13,6 +14,8 @@ namespace SistemaReservasApi.Models
 
         [Required]
         public string PasswordHash { get; set; } = string.Empty;
+
+        public UserRole Rol { get; set; } = UserRole.Cliente;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

@@ -1,15 +1,16 @@
-﻿using SistemaReservasApi.Data;
-using SistemaReservasApi.Dtos;
-using SistemaReservasApi.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using SistemaReservasApi.Data;
+using SistemaReservasApi.Dtos;
+using SistemaReservasApi.Enums;
+using SistemaReservasApi.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System;
 
 namespace SistemaReservasApi.Controllers
 {
@@ -50,6 +51,7 @@ namespace SistemaReservasApi.Controllers
             {
                 Username = userDto.Username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password),
+                Rol = userDto.Rol ?? UserRole.Cliente,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
             };
@@ -60,7 +62,7 @@ namespace SistemaReservasApi.Controllers
             return CreatedAtAction(
                 nameof(Login),
                 new { username = user.Username },
-                new { user.Id, user.Username }
+                new { user.Id, user.Username, user.Rol }
             );
         }
 
@@ -97,7 +99,8 @@ namespace SistemaReservasApi.Controllers
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username)
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, user.Rol.ToString())
             };
             var jwt = new JwtSecurityToken(
                 claims: claims,

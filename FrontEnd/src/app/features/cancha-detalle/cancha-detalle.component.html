@@ -11,7 +11,11 @@
   <div class="container" *ngIf="cancha">
     <div class="cancha-hero">
       <div class="hero-image">
-        <img [src]="getImageUrl(cancha.imagenPrincipal)" [alt]="cancha.nombre" class="main-image">
+        <img
+          [src]="getImageUrl(cancha.imagenPrincipal)"
+          [alt]="cancha.nombre"
+          class="main-image"
+        />
         <div class="image-overlay">
           <div class="sport-badge">{{ cancha.tipoDeporte }}</div>
           <div class="price-badge">
@@ -25,8 +29,12 @@
           <h1 class="cancha-title">{{ cancha.nombre }}</h1>
           <div class="cancha-rating" *ngIf="cancha.numeroCalificaciones > 0">
             <i class="fas fa-star"></i>
-            <span class="rating-value">{{ cancha.calificacion.toFixed(1) }}</span>
-            <span class="rating-count">({{ cancha.numeroCalificaciones }} reseñas)</span>
+            <span class="rating-value">{{
+              cancha.calificacion.toFixed(1)
+            }}</span>
+            <span class="rating-count"
+              >({{ cancha.numeroCalificaciones }} reseñas)</span
+            >
           </div>
         </div>
 
@@ -37,10 +45,16 @@
 
         <p class="cancha-description">{{ cancha.descripcion }}</p>
 
-        <div class="amenidades-section" *ngIf="parseAmenidades(cancha.amenidades).length > 0">
+        <div
+          class="amenidades-section"
+          *ngIf="parseAmenidades(cancha.amenidades).length > 0"
+        >
           <h3>Amenidades incluidas</h3>
           <div class="amenidades-grid">
-            <div *ngFor="let amenidad of parseAmenidades(cancha.amenidades)" class="amenidad-item">
+            <div
+              *ngFor="let amenidad of parseAmenidades(cancha.amenidades)"
+              class="amenidad-item"
+            >
               <i class="fas fa-check"></i>
               <span>{{ amenidad }}</span>
             </div>
@@ -48,14 +62,26 @@
         </div>
 
         <div class="availability-section">
-          <div class="availability-status" [class.available]="cancha.disponible">
-            <i [class]="cancha.disponible ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
-            <span>{{ cancha.disponible ? 'Disponible para reservar' : 'No disponible' }}</span>
+          <div
+            class="availability-status"
+            [class.available]="cancha.disponible"
+          >
+            <i
+              [class]="
+                cancha.disponible
+                  ? 'fas fa-check-circle'
+                  : 'fas fa-times-circle'
+              "
+            ></i>
+            <span>{{
+              cancha.disponible ? "Disponible para reservar" : "No disponible"
+            }}</span>
           </div>
         </div>
 
         <div class="action-section">
           <button
+            *ngIf="authService.canMakeReservations()"
             class="reserve-btn"
             [disabled]="!cancha.disponible"
             (click)="openReservaModal()"
@@ -63,6 +89,14 @@
             <i class="fas fa-calendar-plus"></i>
             Reservar ahora
           </button>
+
+          <div
+            *ngIf="!authService.canMakeReservations()"
+            class="no-reservation-notice"
+          >
+            <i class="fas fa-info-circle"></i>
+            <span> Solo los clientes pueden realizar reservas</span>
+          </div>
         </div>
       </div>
     </div>
@@ -105,7 +139,11 @@
   </div>
 </div>
 
-<div class="modal-overlay" *ngIf="showReservaModal" (click)="closeReservaModal()">
+<div
+  class="modal-overlay"
+  *ngIf="showReservaModal"
+  (click)="closeReservaModal()"
+>
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2>Reservar {{ cancha?.nombre }}</h2>
@@ -129,12 +167,18 @@
             [min]="fechaMinima"
             (change)="onFechaChange()"
           />
-          <div class="invalid-feedback" *ngIf="isFieldInvalid(reservaForm, 'fechaReserva')">
-            {{ getErrorMessage(reservaForm, 'fechaReserva') }}
+          <div
+            class="invalid-feedback"
+            *ngIf="isFieldInvalid(reservaForm, 'fechaReserva')"
+          >
+            {{ getErrorMessage(reservaForm, "fechaReserva") }}
           </div>
         </div>
 
-        <div class="horarios-section" *ngIf="reservaForm.get('fechaReserva')?.value">
+        <div
+          class="horarios-section"
+          *ngIf="reservaForm.get('fechaReserva')?.value"
+        >
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">
@@ -155,8 +199,11 @@
                   {{ horario.label }}
                 </option>
               </select>
-              <div class="invalid-feedback" *ngIf="isFieldInvalid(reservaForm, 'horaInicio')">
-                {{ getErrorMessage(reservaForm, 'horaInicio') }}
+              <div
+                class="invalid-feedback"
+                *ngIf="isFieldInvalid(reservaForm, 'horaInicio')"
+              >
+                {{ getErrorMessage(reservaForm, "horaInicio") }}
               </div>
             </div>
 
@@ -178,8 +225,11 @@
                   {{ horario.label }}
                 </option>
               </select>
-              <div class="invalid-feedback" *ngIf="isFieldInvalid(reservaForm, 'horaFin')">
-                {{ getErrorMessage(reservaForm, 'horaFin') }}
+              <div
+                class="invalid-feedback"
+                *ngIf="isFieldInvalid(reservaForm, 'horaFin')"
+              >
+                {{ getErrorMessage(reservaForm, "horaFin") }}
               </div>
             </div>
           </div>
@@ -211,8 +261,11 @@
               [class.is-invalid]="isFieldInvalid(reservaForm, 'nombreCliente')"
               placeholder="Ingresa tu nombre completo"
             />
-            <div class="invalid-feedback" *ngIf="isFieldInvalid(reservaForm, 'nombreCliente')">
-              {{ getErrorMessage(reservaForm, 'nombreCliente') }}
+            <div
+              class="invalid-feedback"
+              *ngIf="isFieldInvalid(reservaForm, 'nombreCliente')"
+            >
+              {{ getErrorMessage(reservaForm, "nombreCliente") }}
             </div>
           </div>
 
@@ -229,8 +282,11 @@
                 [class.is-invalid]="isFieldInvalid(reservaForm, 'emailCliente')"
                 placeholder="correo@ejemplo.com"
               />
-              <div class="invalid-feedback" *ngIf="isFieldInvalid(reservaForm, 'emailCliente')">
-                {{ getErrorMessage(reservaForm, 'emailCliente') }}
+              <div
+                class="invalid-feedback"
+                *ngIf="isFieldInvalid(reservaForm, 'emailCliente')"
+              >
+                {{ getErrorMessage(reservaForm, "emailCliente") }}
               </div>
             </div>
 
@@ -243,12 +299,17 @@
                 type="tel"
                 formControlName="telefonoCliente"
                 class="form-control"
-                [class.is-invalid]="isFieldInvalid(reservaForm, 'telefonoCliente')"
+                [class.is-invalid]="
+                  isFieldInvalid(reservaForm, 'telefonoCliente')
+                "
                 placeholder="3001234567"
                 maxlength="10"
               />
-              <div class="invalid-feedback" *ngIf="isFieldInvalid(reservaForm, 'telefonoCliente')">
-                {{ getErrorMessage(reservaForm, 'telefonoCliente') }}
+              <div
+                class="invalid-feedback"
+                *ngIf="isFieldInvalid(reservaForm, 'telefonoCliente')"
+              >
+                {{ getErrorMessage(reservaForm, "telefonoCliente") }}
               </div>
             </div>
           </div>
@@ -267,14 +328,23 @@
           </div>
         </div>
 
-        <div class="disponibilidad-info" *ngIf="disponibilidad && !isLoadingDisponibilidad">
+        <div
+          class="disponibilidad-info"
+          *ngIf="disponibilidad && !isLoadingDisponibilidad"
+        >
           <h4>Reservas activas para esta fecha:</h4>
-          <div class="reservas-activas" *ngIf="disponibilidad.reservasActivas.length > 0; else noReservas">
-            <div *ngFor="let reserva of disponibilidad.reservasActivas" class="reserva-activa">
+          <div
+            class="reservas-activas"
+            *ngIf="disponibilidad.reservasActivas.length > 0; else noReservas"
+          >
+            <div
+              *ngFor="let reserva of disponibilidad.reservasActivas"
+              class="reserva-activa"
+            >
               <i class="fas fa-calendar-check"></i>
               <span>
-                {{ formatTime(reserva.horaInicio) }} - {{ formatTime(reserva.horaFin) }}
-                ({{ reserva.nombreCliente }})
+                {{ formatTime(reserva.horaInicio) }} -
+                {{ formatTime(reserva.horaFin) }} ({{ reserva.nombreCliente }})
               </span>
             </div>
           </div>
@@ -293,7 +363,11 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeReservaModal()">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closeReservaModal()"
+        >
           Cancelar
         </button>
         <button
@@ -327,12 +401,15 @@
           </div>
           <div class="summary-item">
             <span>Fecha:</span>
-            <span>{{ formatDate(reservaForm.get('fechaReserva')?.value) }}</span>
+            <span>{{
+              formatDate(reservaForm.get("fechaReserva")?.value)
+            }}</span>
           </div>
           <div class="summary-item">
             <span>Horario:</span>
             <span>
-              {{ reservaForm.get('horaInicio')?.value }} - {{ reservaForm.get('horaFin')?.value }}
+              {{ reservaForm.get("horaInicio")?.value }} -
+              {{ reservaForm.get("horaFin")?.value }}
             </span>
           </div>
           <div class="summary-total">
@@ -364,8 +441,11 @@
               placeholder="1234 5678 9012 3456"
               maxlength="19"
             />
-            <div class="invalid-feedback" *ngIf="isFieldInvalid(pagoForm, 'numeroTarjeta')">
-              {{ getErrorMessage(pagoForm, 'numeroTarjeta') }}
+            <div
+              class="invalid-feedback"
+              *ngIf="isFieldInvalid(pagoForm, 'numeroTarjeta')"
+            >
+              {{ getErrorMessage(pagoForm, "numeroTarjeta") }}
             </div>
           </div>
 
@@ -381,8 +461,11 @@
               [class.is-invalid]="isFieldInvalid(pagoForm, 'nombreTarjeta')"
               placeholder="JUAN CARLOS SALAZAR"
             />
-            <div class="invalid-feedback" *ngIf="isFieldInvalid(pagoForm, 'nombreTarjeta')">
-              {{ getErrorMessage(pagoForm, 'nombreTarjeta') }}
+            <div
+              class="invalid-feedback"
+              *ngIf="isFieldInvalid(pagoForm, 'nombreTarjeta')"
+            >
+              {{ getErrorMessage(pagoForm, "nombreTarjeta") }}
             </div>
           </div>
 
@@ -396,12 +479,17 @@
                 type="text"
                 formControlName="fechaVencimiento"
                 class="form-control"
-                [class.is-invalid]="isFieldInvalid(pagoForm, 'fechaVencimiento')"
+                [class.is-invalid]="
+                  isFieldInvalid(pagoForm, 'fechaVencimiento')
+                "
                 placeholder="MM/YY"
                 maxlength="5"
               />
-              <div class="invalid-feedback" *ngIf="isFieldInvalid(pagoForm, 'fechaVencimiento')">
-                {{ getErrorMessage(pagoForm, 'fechaVencimiento') }}
+              <div
+                class="invalid-feedback"
+                *ngIf="isFieldInvalid(pagoForm, 'fechaVencimiento')"
+              >
+                {{ getErrorMessage(pagoForm, "fechaVencimiento") }}
               </div>
             </div>
 
@@ -418,8 +506,11 @@
                 placeholder="123"
                 maxlength="4"
               />
-              <div class="invalid-feedback" *ngIf="isFieldInvalid(pagoForm, 'cvv')">
-                {{ getErrorMessage(pagoForm, 'cvv') }}
+              <div
+                class="invalid-feedback"
+                *ngIf="isFieldInvalid(pagoForm, 'cvv')"
+              >
+                {{ getErrorMessage(pagoForm, "cvv") }}
               </div>
             </div>
           </div>
@@ -427,7 +518,11 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closePagoModal()">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="closePagoModal()"
+        >
           Cancelar
         </button>
         <button
@@ -435,9 +530,16 @@
           class="btn btn-success"
           [disabled]="pagoForm.invalid || isLoadingReserva"
         >
-          <span *ngIf="isLoadingReserva" class="spinner-border spinner-border-sm me-2"></span>
+          <span
+            *ngIf="isLoadingReserva"
+            class="spinner-border spinner-border-sm me-2"
+          ></span>
           <i *ngIf="!isLoadingReserva" class="fas fa-credit-card me-2"></i>
-          {{ isLoadingReserva ? 'Procesando...' : 'Pagar ' + formatPrice(calcularPrecioTotal()) }}
+          {{
+            isLoadingReserva
+              ? "Procesando..."
+              : "Pagar " + formatPrice(calcularPrecioTotal())
+          }}
         </button>
       </div>
     </form>
