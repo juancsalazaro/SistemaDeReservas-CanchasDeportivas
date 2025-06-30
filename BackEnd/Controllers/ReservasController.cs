@@ -6,6 +6,7 @@ using SistemaReservasApi.Data;
 using SistemaReservasApi.Models;
 using SistemaReservasApi.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
+using SistemaReservasApi.Servicios;
 
 namespace SistemaReservasApi.Controllers
 {
@@ -16,9 +17,12 @@ namespace SistemaReservasApi.Controllers
     {
         private readonly AppDbContext _context;
 
-        public ReservasController(AppDbContext context)
+        private readonly IEmailService _emailService;
+
+        public ReservasController(AppDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService; // Asignamos el servicio recibido
         }
 
         /// <summary>
@@ -103,6 +107,34 @@ namespace SistemaReservasApi.Controllers
 
             _context.Reservas.Add(reserva);
             await _context.SaveChangesAsync();
+
+            //intenta enviar el correo y maneja los errores que puedan ocurrir
+
+            // **************************************************************
+            try
+            {
+                // Usamos los datos que ya tenemos para construir el correo.
+                // El email del cliente ya lo tienes en reserva.EmailCliente.
+                if (!string.IsNullOrEmpty(reserva.EmailCliente))
+                {
+                    await _emailService.SendReservationConfirmationEmailAsync(
+                        reserva.EmailCliente,
+                        reserva.NombreCliente,
+                        cancha.Nombre, // Ya tienes la cancha cargada desde antes
+                        reserva.FechaReserva.Date.Add(reserva.HoraInicio.TimeOfDay) // Combinamos fecha y hora correctamente // Combinamos fecha y hora para el correo
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al enviar correo de confirmación: {ex.Message}");
+            }
+            // ***************************************************************
+
+
+            // Cargar datos relacionados para la respuesta
+            await _context.Entry(reserva).Reference(r => r.Cancha).LoadAsync();
+            await _context.Entry(reserva).Reference(r => r.User).LoadAsync();
 
             // Cargar datos relacionados para la respuesta
             await _context.Entry(reserva)
