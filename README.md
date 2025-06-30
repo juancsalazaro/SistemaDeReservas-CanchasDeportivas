@@ -1,6 +1,8 @@
+# Sistema de Reservas para Canchas Deportivas 🏆
+
 ## 📋 Descripción
 
-Este proyecto permite a los usuarios registrarse, iniciar sesión y gestionar reservas de canchas deportivas de manera intuitiva. El sistema cuenta con una arquitectura robusta dividida en backend y frontend, ofreciendo una experiencia de usuario fluida y moderna con **sistema de reservas completo**.
+Este proyecto permite a los usuarios registrarse, iniciar sesión y gestionar reservas de canchas deportivas de manera intuitiva. El sistema cuenta con una arquitectura robusta dividida en backend y frontend, ofreciendo una experiencia de usuario fluida y moderna con **sistema de reservas completo** y **manejo de roles diferenciados**.
 
 ## 🚀 Tecnologías Utilizadas
 
@@ -8,9 +10,10 @@ Este proyecto permite a los usuarios registrarse, iniciar sesión y gestionar re
 - **.NET 8** - Framework principal
 - **PostgreSQL** - Base de datos principal
 - **Entity Framework Core** - ORM
-- **JWT** - Autenticación y autorización
+- **JWT** - Autenticación y autorización con roles
 - **BCrypt** - Encriptación de contraseñas
 - **Swagger** - Documentación de API
+- **Sistema de Email** - Confirmaciones automáticas
 
 ### Frontend
 - **Angular 18** - Framework de frontend
@@ -18,6 +21,27 @@ Este proyecto permite a los usuarios registrarse, iniciar sesión y gestionar re
 - **Bootstrap** - Framework CSS
 - **Font Awesome** - Iconografía
 - **Reactive Forms** - Manejo de formularios
+- **JWT Decoder** - Manejo de roles y tokens
+
+## 👥 Sistema de Roles
+
+El sistema cuenta con **roles diferenciados** que proporcionan diferentes niveles de acceso:
+
+### 🔑 Roles Disponibles
+
+| Rol | Descripción | Permisos |
+|-----|-------------|----------|
+| **Cliente** | Usuario estándar que puede reservar canchas | ✅ Ver canchas<br>✅ Hacer reservas<br>✅ Gestionar sus reservas<br>❌ Crear canchas |
+| **Administrador** | Usuario con permisos de gestión de canchas | ✅ Ver canchas<br>✅ Crear canchas<br>✅ Gestionar sistema<br>❌ Hacer reservas |
+| **Empleado** | Usuario con permisos limitados (futuro) | ✅ Ver canchas<br>❌ Crear canchas<br>❌ Hacer reservas |
+
+### 🛡️ Protección de Rutas
+
+- **Guards de autenticación**: Todas las rutas principales requieren login
+- **Guards de roles**: Rutas específicas protegidas por rol:
+  - `/mis-reservas` → Solo **Clientes**
+  - `/crear-cancha` → Solo **Administradores**
+- **Interfaz adaptativa**: Los botones y opciones se muestran según el rol del usuario
 
 ## 📁 Estructura del Proyecto
 
@@ -25,23 +49,29 @@ Este proyecto permite a los usuarios registrarse, iniciar sesión y gestionar re
 SistemaDeReservas-CanchasDeportivas/
 ├── BackEnd/
 │   ├── Controllers/
-│   │   ├── AuthController.cs
+│   │   ├── AuthController.cs              # ✅ CON ROLES
 │   │   ├── CanchasController.cs
 │   │   └── ReservasController.cs          # ✅ NUEVO
 │   ├── Data/
-│   │   └── AppDbContext.cs
+│   │   └── AppDbContext.cs               # ✅ ACTUALIZADO CON ROLES
 │   ├── Models/
-│   │   ├── User.cs
+│   │   ├── User.cs                       # ✅ CON CAMPO ROL
 │   │   ├── Cancha.cs
-│   │   └── Reserva.cs                     # ✅ NUEVO
+│   │   └── Reserva.cs                    # ✅ NUEVO
 │   ├── Dtos/
-│   │   ├── UserDto.cs
+│   │   ├── UserDto.cs                    # ✅ CON ROL
 │   │   ├── CanchaDto.cs
 │   │   ├── CanchaResponseDto.cs
-│   │   ├── ReservaDto.cs                  # ✅ NUEVO
-│   │   ├── ReservaResponseDto.cs          # ✅ NUEVO
-│   │   ├── DisponibilidadResponseDto.cs   # ✅ NUEVO
-│   │   └── PagoSimuladoDto.cs            # ✅ NUEVO
+│   │   ├── ReservaDto.cs                 # ✅ NUEVO
+│   │   ├── ReservaResponseDto.cs         # ✅ NUEVO
+│   │   ├── DisponibilidadResponseDto.cs  # ✅ NUEVO
+│   │   └── PagoSimuladoDto.cs           # ✅ NUEVO
+│   ├── Services/
+│   │   └── EmailService.cs               # ✅ NUEVO - ENVÍO DE CORREOS
+│   ├── Guards/
+│   │   └── RoleAttribute.cs              # ✅ NUEVO - AUTORIZACIÓN POR ROLES
+│   ├── Enums/
+│   │   └── UserRole.cs                   # ✅ NUEVO - ENUM DE ROLES
 │   ├── Migrations/
 │   └── Program.cs
 ├── FrontEnd/
@@ -49,15 +79,17 @@ SistemaDeReservas-CanchasDeportivas/
 │   │   ├── app/
 │   │   │   ├── core/
 │   │   │   │   ├── auth.guard.ts
+│   │   │   │   ├── role.guard.ts         # ✅ NUEVO - GUARD DE ROLES
 │   │   │   │   ├── auth.interceptor.ts
-│   │   │   │   └── auth.service.ts
+│   │   │   │   ├── auth.service.ts       # ✅ ACTUALIZADO CON ROLES
+│   │   │   │   └── jwt.service.ts        # ✅ NUEVO - DECODIFICACIÓN JWT
 │   │   │   ├── features/
 │   │   │   │   ├── login/
-│   │   │   │   ├── register/
-│   │   │   │   ├── dashboard/
+│   │   │   │   ├── register/             # ✅ CON SELECCIÓN DE ROL
+│   │   │   │   ├── dashboard/            # ✅ INTERFAZ ADAPTATIVA POR ROL
 │   │   │   │   └── reservas/             # ✅ NUEVO
 │   │   │   ├── models/
-│   │   │   │   ├── user.dto.ts
+│   │   │   │   ├── user.dto.ts           # ✅ CON ROL Y ENUM
 │   │   │   │   ├── cancha.dto.ts
 │   │   │   │   └── reserva.dto.ts        # ✅ NUEVO
 │   │   │   └── services/
@@ -93,16 +125,23 @@ SistemaDeReservas-CanchasDeportivas/
    GRANT ALL PRIVILEGES ON DATABASE ReservasCanchas TO reservas_user;
    ```
 
-3. **Configurar cadena de conexión**
+3. **Configurar cadena de conexión y servicios**
    
    Actualizar `BackEnd/appsettings.json`:
    ```json
    {
-     "ConnectionStrings": {
-       "DefaultConnection": "Host=localhost;Database=ReservasCanchas;Username=postgres;Password=tu_password;Port=5432"
+     \"ConnectionStrings\": {
+       \"DefaultConnection\": \"Host=localhost;Database=ReservasCanchas;Username=postgres;Password=tu_password;Port=5432\"
      },
-     "Jwt": {
-       "Key": "TuClaveSecretaMuySeguraAqui123456789"
+     \"Jwt\": {
+       \"Key\": \"TuClaveSecretaMuySeguraAqui123456789\"
+     },
+     \"EmailSettings\": {
+       \"SmtpServer\": \"smtp.gmail.com\",
+       \"SmtpPort\": 587,
+       \"SenderEmail\": \"tu-email@gmail.com\",
+       \"SenderPassword\": \"tu-app-password\",
+       \"EnableSsl\": true
      }
    }
    ```
@@ -111,6 +150,7 @@ SistemaDeReservas-CanchasDeportivas/
    ```bash
    cd BackEnd
    dotnet restore
+   dotnet ef migrations add AddRolesToUsers
    dotnet ef database update
    ```
 
@@ -140,104 +180,100 @@ SistemaDeReservas-CanchasDeportivas/
 
 ### Autenticación
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| POST | `/api/v1/auth/register` | Registrar nuevo usuario |
-| POST | `/api/v1/auth/login` | Iniciar sesión |
+| Método | Endpoint | Descripción | Roles |
+|--------|----------|-------------|-------|
+| POST | `/api/v1/auth/register` | Registrar nuevo usuario con rol | Público |
+| POST | `/api/v1/auth/login` | Iniciar sesión (retorna rol en JWT) | Público |
 
 ### Canchas
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/v1/canchas` | Obtener todas las canchas con filtros |
-| GET | `/api/v1/canchas/{id}` | Obtener cancha por ID |
-| POST | `/api/v1/canchas` | Crear nueva cancha (requiere autenticación) |
-| GET | `/api/v1/canchas/tipos-deporte` | Obtener tipos de deportes disponibles |
+| Método | Endpoint | Descripción | Roles |
+|--------|----------|-------------|-------|
+| GET | `/api/v1/canchas` | Obtener todas las canchas con filtros | Todos |
+| GET | `/api/v1/canchas/{id}` | Obtener cancha por ID | Todos |
+| POST | `/api/v1/canchas` | Crear nueva cancha | **Solo Administrador** |
+| GET | `/api/v1/canchas/tipos-deporte` | Obtener tipos de deportes disponibles | Todos |
 
 ### 🆕 Reservas
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| POST | `/api/v1/reservas` | Crear nueva reserva |
-| GET | `/api/v1/reservas/mis-reservas` | Obtener reservas del usuario autenticado |
-| GET | `/api/v1/reservas/{id}` | Obtener reserva específica por ID |
-| GET | `/api/v1/reservas/disponibilidad` | Consultar disponibilidad de cancha por fecha |
-| PATCH | `/api/v1/reservas/{id}/cancelar` | Cancelar una reserva |
+| Método | Endpoint | Descripción | Roles |
+|--------|----------|-------------|-------|
+| POST | `/api/v1/reservas` | Crear nueva reserva + envío de email | **Solo Cliente** |
+| GET | `/api/v1/reservas/mis-reservas` | Obtener reservas del usuario autenticado | **Solo Cliente** |
+| GET | `/api/v1/reservas/{id}` | Obtener reserva específica por ID | **Solo Cliente** |
+| GET | `/api/v1/reservas/disponibilidad` | Consultar disponibilidad de cancha por fecha | Todos |
+| PATCH | `/api/v1/reservas/{id}/cancelar` | Cancelar una reserva | **Solo Cliente** |
 
 ### Ejemplo de uso
 
-**Registro:**
+**Registro con rol:**
 ```json
 POST /api/v1/auth/register
 {
-  "username": "usuario123",
-  "password": "contraseña123"
+  \"username\": \"cliente123\",
+  \"password\": \"contraseña123\",
+  \"rol\": \"Cliente\"
 }
 ```
 
-**Login:**
+**Login (respuesta incluye rol):**
 ```json
 POST /api/v1/auth/login
 {
-  "username": "usuario123",
-  "password": "contraseña123"
+  \"username\": \"cliente123\",
+  \"password\": \"contraseña123\"
 }
-```
 
-**Obtener canchas con filtros:**
-```bash
-GET /api/v1/canchas?tipoDeporte=Futbol&precioMaximo=50000&disponible=true
-```
-
-**Crear cancha:**
-```json
-POST /api/v1/canchas
-Authorization: Bearer {token}
+// Respuesta:
 {
-  "nombre": "Cancha El Estadio",
-  "descripcion": "Cancha de fútbol profesional con césped sintético",
-  "tipoDeporte": "Futbol",
-  "ubicacion": "Estadio La Nubia, Manizales",
-  "precioPorHora": 80000,
-  "amenidades": "[\"Vestuarios\", \"Estacionamiento\", \"Iluminación\"]"
-}
-```
-
-**🆕 Crear reserva:**
-```json
-POST /api/v1/reservas
-Authorization: Bearer {token}
-{
-  "canchaId": 1,
-  "fechaReserva": "2024-07-15T00:00:00",
-  "horaInicio": "2024-07-15T14:00:00",
-  "horaFin": "2024-07-15T16:00:00",
-  "nombreCliente": "Juan Pérez",
-  "emailCliente": "juan@email.com",
-  "telefonoCliente": "123456789",
-  "observaciones": "Reserva para partido amistoso",
-  "datosPago": {
-    "tipoTarjeta": "Visa",
-    "numeroTarjeta": "4111 1111 1111 1111",
-    "nombreTarjeta": "Juan Pérez",
-    "fechaVencimiento": "12/25",
-    "cvv": "123"
+  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",
+  \"user\": {
+    \"id\": 1,
+    \"username\": \"cliente123\",
+    \"rol\": \"Cliente\"
   }
 }
 ```
 
-**🆕 Consultar disponibilidad:**
-```bash
-GET /api/v1/reservas/disponibilidad?canchaId=1&fecha=2024-07-15T00:00:00
+**🆕 Crear reserva (con envío automático de email):**
+```json
+POST /api/v1/reservas
+Authorization: Bearer {token}
+{
+  \"canchaId\": 1,
+  \"fechaReserva\": \"2024-07-15T00:00:00\",
+  \"horaInicio\": \"2024-07-15T14:00:00\",
+  \"horaFin\": \"2024-07-15T16:00:00\",
+  \"nombreCliente\": \"Juan Pérez\",
+  \"emailCliente\": \"juan@email.com\",
+  \"telefonoCliente\": \"123456789\",
+  \"observaciones\": \"Reserva para partido amistoso\",
+  \"datosPago\": {
+    \"tipoTarjeta\": \"Visa\",
+    \"numeroTarjeta\": \"4111 1111 1111 1111\",
+    \"nombreTarjeta\": \"Juan Pérez\",
+    \"fechaVencimiento\": \"12/25\",
+    \"cvv\": \"123\"
+  }
+}
 ```
 
 ## 🎯 Funcionalidades Implementadas
 
-### ✅ Autenticación y Seguridad
-- **Registro de usuarios** con validaciones robustas
-- **Inicio de sesión** con JWT
+### ✅ Autenticación y Seguridad con Roles
+- **Registro de usuarios** con selección de rol
+- **Inicio de sesión** con JWT que incluye información de rol
 - **Encriptación de contraseñas** con BCrypt
-- **Guards y interceptores** para protección de rutas
+- **Guards de autenticación y roles** para protección granular
+- **Interfaz adaptativa** según permisos del usuario
+- **Decodificación JWT** en frontend para manejo de roles
+
+### ✅ Sistema de Roles Diferenciado
+- **Clientes**: Pueden hacer reservas pero no crear canchas
+- **Administradores**: Pueden crear canchas pero no hacer reservas
+- **Visualización del rol** en la interfaz de usuario
+- **Protección de rutas** basada en roles
+- **Mensajes de error** informativos para accesos no autorizados
 
 ### ✅ Gestión de Canchas
 - **CRUD completo** de canchas deportivas
@@ -245,50 +281,45 @@ GET /api/v1/reservas/disponibilidad?canchaId=1&fecha=2024-07-15T00:00:00
 - **Búsqueda por ubicación** integrada
 - **Categorización** por tipos de deporte
 - **Sistema de calificaciones** y reseñas
+- **Creación restringida** solo para administradores
 
-### 🆕 ✅ Sistema de Reservas
+### 🆕 ✅ Sistema de Reservas con Notificaciones
 - **Creación de reservas** con validación de disponibilidad
+- **📧 Envío automático de correo** de confirmación al crear reserva
 - **Gestión de horarios** por bloques de tiempo
 - **Verificación de conflictos** de reservas
 - **Consulta de disponibilidad** en tiempo real
 - **Cancelación de reservas** con restricciones de tiempo
-- **Historial de reservas** por usuario
+- **Historial de reservas** por usuario (solo clientes)
 - **Simulación de pagos** con múltiples métodos
 - **Cálculo automático** de precios por hora
 - **Estados de reserva** (Confirmada, Cancelada, Completada)
 
-### ✅ Dashboard Moderno
-- **Interfaz intuitiva** y responsive
-- **Buscador avanzado** con múltiples filtros
-- **Grid adaptativo** de canchas
-- **Cards interactivas** con efectos visuales
-- **Categorías deportivas** con iconos
-- **Estados de carga** informativos
+### ✅ Dashboard Adaptativo por Rol
+- **Interfaz diferenciada** según el rol del usuario
+- **Botones contextuales** que aparecen según permisos
+- **Información del usuario y rol** visible en header
+- **Navegación intuitiva** adaptada a funcionalidades disponibles
+- **Iconos distintivos** para cada tipo de rol
 
-### ✅ Experiencia de Usuario
-- **Diseño responsive** para todos los dispositivos
-- **Validación de formularios** en tiempo real
-- **Manejo de errores** con feedback visual
-- **Animaciones suaves** y transiciones
-- **Estados de carga** informativos
-- **Navegación intuitiva** entre secciones
-
-### ✅ Tecnología y Arquitectura
-- **API REST** bien estructurada
-- **Base de datos PostgreSQL** optimizada
-- **Componentes standalone** en Angular
-- **Servicios modulares** y reutilizables
-- **Arquitectura escalable** y mantenible
+### 📧 Sistema de Notificaciones por Email
+- **Confirmación automática** al crear una reserva
+- **Detalles completos** de la reserva en el correo
+- **Información de la cancha** y horarios reservados
+- **Datos de contacto** para soporte
+- **Diseño profesional** del template de correo
 
 ## 🗄️ Modelo de Base de Datos
 
-### Tabla: Users
+### Tabla: Users (✅ Actualizada)
 ```sql
 - Id (int, PK)
 - Username (varchar, unique)
 - PasswordHash (varchar)
+- Rol (varchar) -- 'Cliente', 'Administrador', 'Empleado'
 - CreatedAt (timestamp)
 - UpdatedAt (timestamp)
+- IsActive (boolean)
 ```
 
 ### Tabla: Canchas
@@ -330,58 +361,66 @@ GET /api/v1/reservas/disponibilidad?canchaId=1&fecha=2024-07-15T00:00:00
 
 ## 🎨 Capturas de Pantalla
 
-### Dashboard Principal
-*Interfaz principal con búsqueda avanzada y grid de canchas deportivas*
+### Dashboard con Roles
+*Interfaz principal que se adapta según el rol del usuario (Cliente/Administrador)*
 
-### Sistema de Reservas
-*Formulario de reserva con selección de fecha/hora y simulación de pago*
+### Sistema de Registro con Roles
+*Formulario de registro que permite seleccionar el rol del usuario*
 
-### Gestión de Reservas
-*Panel para ver, gestionar y cancelar reservas del usuario*
+### Gestión de Reservas (Solo Clientes)
+*Panel exclusivo para clientes para gestionar sus reservas*
 
-### Login/Register
-*Formularios modernos con validaciones en tiempo real y diseño responsive*
+### Creación de Canchas (Solo Administradores)
+*Formulario exclusivo para administradores para crear nuevas canchas*
 
-### Gestión de Canchas
-*CRUD completo con filtros y categorización por deportes*
+### Sistema de Email
+*Correo de confirmación automático enviado tras cada reserva*
 
 ## 🔍 Características Técnicas
 
 ### Backend (.NET 8)
 - **Entity Framework Core** con PostgreSQL
-- **JWT Authentication** stateless
+- **JWT Authentication** con claims de roles
+- **Autorización basada en roles** con atributos personalizados
+- **Sistema de email SMTP** para notificaciones
 - **CORS** configurado para desarrollo
-- **Swagger/OpenAPI** para documentación
+- **Swagger/OpenAPI** con documentación de roles
 - **Validaciones** robustas en DTOs
-- **Arquitectura limpia** con separación de responsabilidades
-- **Manejo de fechas/horas** con TimeZone
-- **Validación de conflictos** de reservas
-- **Simulación de pagos** integrada
+- **Enum de roles** para type safety
+- **Migración de base de datos** para campo rol
 
 ### Frontend (Angular 18)
-- **Standalone Components** modernos
+- **JWT Service** para decodificación de tokens
+- **Role Guards** para protección de rutas
+- **Servicios de autenticación** con manejo de roles
+- **Interfaz adaptativa** que responde a permisos
+- **Componentes standalone** modernos
 - **Reactive Forms** con validaciones
-- **RxJS** para manejo de estado
-- **Font Awesome** para iconografía
-- **CSS moderno** con variables y gradientes
 - **TypeScript** estricto para type safety
-- **Interceptores HTTP** para autenticación
-- **Guards de navegación** para rutas protegidas
 
 ## 🚨 Notas Importantes
 
-### Sistema de Reservas
+### Sistema de Roles
+- Los **Clientes** pueden reservar pero no crear canchas
+- Los **Administradores** pueden crear canchas pero no reservar
+- El rol se asigna durante el registro y se valida en cada request
+- Las rutas están protegidas tanto en frontend como backend
+- La interfaz se adapta automáticamente según el rol del usuario
+
+### Sistema de Reservas y Notificaciones
 - Las reservas se pueden cancelar hasta **2 horas antes** de la hora de inicio
+- **Correo de confirmación automático** se envía al email del cliente
 - El sistema valida automáticamente conflictos de horario
 - Los pagos son **simulados** para propósitos de demostración
 - Las horas disponibles van de **6:00 AM a 10:00 PM**
 - Se permite reservar con **bloques de 1 hora mínimo**
 
 ### Seguridad
-- Todas las rutas de reservas requieren **autenticación JWT**
-- Los usuarios solo pueden ver y gestionar **sus propias reservas**
+- Todas las rutas requieren **autenticación JWT**
+- **Autorización por roles** implementada en backend y frontend
+- Los usuarios solo pueden acceder a funciones según su rol
 - Las contraseñas se encriptan con **BCrypt**
-- Los tokens JWT expiran según configuración
+- Los tokens JWT incluyen claims de rol para validación
 
 ## 🤝 Contribuciones
 
@@ -396,13 +435,16 @@ Las contribuciones son bienvenidas. Para contribuir:
 ### Guías de Contribución
 - Seguir las convenciones de naming establecidas
 - Incluir tests para nuevas funcionalidades
+- Respetar el sistema de roles implementado
 - Actualizar documentación cuando sea necesario
 - Mantener el estilo de código consistente
 - Usar migraciones de EF Core para cambios de BD
 
 ## 👨‍💻 Autor
 
-**Juan Camilo Salazar**
+**Juan Camilo Salazar**  
+**Hanner Obando**
+
 - GitHub: [@juancsalazaro](https://github.com/juancsalazaro)
 - LinkedIn: [juan-camilo-salazar-osorio](https://www.linkedin.com/in/juan-camilo-salazar-osorio/)
 
@@ -410,4 +452,12 @@ Las contribuciones son bienvenidas. Para contribuir:
 
 ⭐ Si te gusta este proyecto, ¡dale una estrella en GitHub!
 
-🚀 **Estado del Proyecto**: Activamente desarrollado | **Versión**: 2.0.0 | **Última actualización**: Junio 2025
+🚀 **Estado del Proyecto**: Activamente desarrollado | **Versión**: 2.1.0 | **Última actualización**: Junio 2025
+
+### 🔄 Changelog v2.1.0
+- ✅ **Sistema de roles** completo implementado
+- ✅ **Guards de autorización** por rol en frontend y backend
+- ✅ **Interfaz adaptativa** según permisos de usuario
+- ✅ **Sistema de email** para confirmaciones de reserva
+- ✅ **JWT con claims de rol** para seguridad granular
+- ✅ **Migración de base de datos** para soporte de roles
